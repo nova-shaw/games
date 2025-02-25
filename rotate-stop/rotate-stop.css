@@ -142,6 +142,6 @@ main {
 
 
 
-body.playing #deck {
+#display.playing #deck {
   background: #0fb;
 }

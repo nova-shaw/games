@@ -1,4 +1,4 @@
-
+import * as timer from '../_common/modules/timer.js'
 import * as lessonData from '../_lessons/class5_bookb_07.js';
 
 const log = console.log;
@@ -10,12 +10,7 @@ const mediaPath = `../_lessons/${lessonid}/`;
 
 const display = document.querySelector('#display')
 const btnPlay = document.querySelector('button#play');
-btnPlay.addEventListener('click', () => {
-  document.body.classList.toggle('playing');
-  /*cardList.forEach( c => {
-    c.classList.toggle('show');
-  })*/
-});
+const rngSpeed = document.querySelector('#speed');
 
 
 const cardList = [];
@@ -64,16 +59,70 @@ function buildCard(cardData) {
   sides.appendChild(back);
   card.appendChild(sides);
 
-  card.addEventListener('click', flipCard);
+  // card.addEventListener('click', flipCard);
 
   return card;
 }
 
-function flipCard(e) {
+/*function flipCard(e) {
   const card = e.currentTarget.closest('.card');
   // log(card);
   card.classList.toggle('show');
-}
+}*/
 
 
 buildDeck(lessonData.data);
+
+
+//// Play
+
+btnPlay.addEventListener('click', togglePlay);
+rngSpeed.addEventListener('input', speedChange);
+
+function togglePlay() {
+  const playingTrue = display.classList.toggle('playing'); //// toggle() returns boolean
+  if (playingTrue) {
+    timer.play();
+  } else {
+    timer.pause();
+  }
+}
+
+function speedChange(e) {
+  const ms = valToInterval(e.currentTarget.value);
+  timer.intervalSet(ms);
+}
+
+timer.settings({
+  interval: valToInterval(rngSpeed.value),
+  intervalArray: cardList,
+  intervalCallback: flipIndex,
+  // playBackwards: true
+});
+
+
+const fwd = document.querySelector('button#fwd');
+const bck = document.querySelector('button#bck');
+
+fwd.addEventListener('click', e => {
+  timer.settings({ playBackwards: false });
+});
+bck.addEventListener('click', e => {
+  timer.settings({ playBackwards: true });
+});
+
+let prevIndex = null;
+
+function flipIndex(index, item) {
+  // log(index, item);
+  if (prevIndex != null) cardList[prevIndex].classList.remove('show');
+  cardList[index].classList.add('show');
+  prevIndex = index;
+}
+
+
+//// Utils
+
+function valToInterval(value) {
+  return 2400 - (value * 20);
+}

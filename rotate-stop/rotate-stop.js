@@ -23,7 +23,7 @@ function buildDeck(data) {
   data.vocab.forEach( item => {
     const card = buildCard(item);
     cardList.push(card);
-    deck.appendChild( card );
+    deck.appendChild(card);
   });
 
   log(cardList);
@@ -97,7 +97,8 @@ timer.settings({
   interval: valToInterval(rngSpeed.value),
   intervalArray: cardList,
   intervalCallback: flipIndex,
-  // playBackwards: true
+  // playBackwards: true,
+  // playRandom: true
 });
 
 

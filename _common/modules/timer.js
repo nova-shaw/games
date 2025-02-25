@@ -6,12 +6,13 @@ const opts = {
   intervalArray: [],
   triggerOnPlay: true,
   playBackwards: false,
-  randomIndex: false //// false = linear, true = random
+  playRandom: false //// false = linear, true = random
 }
 
 // Internal State
 let playing = false;
 let index = 0;
+let indicesToExcludeFromRandom = []; // keep records of last 2 random choices so as to not repeat them
 let raf; // reference for RAF, in case we need to cancel it
 let zero = document.timeline.currentTime;
 let elapsedInterval = 0;
@@ -29,6 +30,7 @@ export function settings({
   intervalCallback = null,
   triggerOnPlay, //// dont wait for first interval to finish before calling first onInterval callback
   playBackwards,
+  playRandom,
   // intervalLoop = false,
   // callbacks = { interval: null, play: null, pause: null, end: null }
 } = {}) {
@@ -36,9 +38,11 @@ export function settings({
   if (interval) opts.interval = interval;
   if (triggerOnPlay !== undefined) opts.triggerOnPlay = triggerOnPlay;
   if (playBackwards !== undefined) opts.playBackwards = playBackwards;
+  if (playRandom !== undefined) opts.playRandom = playRandom;
   if (intervalArray.length > 0) opts.intervalArray = intervalArray;
 
-  log('interval', interval)
+  // log('interval', interval);
+  log('settings', opts);
 
   if (intervalCallback) onInterval = intervalCallback;
 }
@@ -81,13 +85,31 @@ function animate(timestamp) {
 
   if (elapsedInterval > opts.interval) {
     
-    if (opts.playBackwards) {
-      index = nextIndexDown(index, opts.intervalArray);
+    if (opts.playRandom) {
+      //// Play randomly
+
+      // indicesToExcludeFromRandom.push(index);
+      // log(indicesToExcludeFromRandom);
+      // index = randomIndexExclude(0, opts.intervalArray.length - 1, indicesToExcludeFromRandom);
+      index = randomIndexFromArray(opts.intervalArray);
+
     } else {
-      index = nextIndexUp(index, opts.intervalArray);
+      //// Play sequentially
+
+      if (opts.playBackwards) {
+
+        //// Play sequentially backwards
+        index = nextIndexDown(index, opts.intervalArray);
+
+      } else {
+
+        //// Play sequentially forwards
+        index = nextIndexUp(index, opts.intervalArray);
+      }
     }
 
     if (onInterval) onInterval(index, opts.intervalArray[index]);
+
     zero = document.timeline.currentTime;
   }
 
@@ -107,8 +129,61 @@ function nextIndexDown(index, array) {
 }
 
 
-function randomIndexExclude(min, max, exclude) {
+/*
+  Ok, there are 2 ways to randomise the card chosen to flip:
+  1. Just pick a random index each time (while keeping a list of what's already been chosen and excluding them)
+  2. Shuffle the list of indexes first, then step through them sequentially
+*/
+
+
+function randomIndexExclude_old1(min, max, exclude) {
   var num = Math.floor(Math.random() * (max - min + 1)) + min;
   // return (num === exclude) ? (num < max/2) ? num + 1 : num - 1 : num;
   return (exclude.indexOf(num) === -1) ? (num < max/2) ? num + 1 : num - 1 : num;
 }
+
+function randomIndexExclude(min, max, exclude) {
+  let chosen
+  if (exclude.length > max - 3) {
+    console.error('too few options!');
+    return;
+  }
+  while (!chosen) {
+    const candidate = Math.floor( Math.random() * (max - min + 1) ) + min;
+    if (exclude.indexOf(candidate) === -1) chosen = candidate;
+  }
+  return chosen;
+}
+
+
+
+let previousIndexes = [];
+function randomIndexFromArray(array, excludeHowMany = 2) {
+
+  if (excludeHowMany > array.length - 3) {
+    console.error('too many excluded:', excludeHowMany, ' from array of length:', array.length);
+    return;
+  }
+
+  const min = 0;
+  const max = array.length - 1;
+
+  let chosen;
+  while (!chosen) {
+    // const candidate = Math.floor( Math.random() * (max - min + 1) ) + min;
+    // const candidate = Math.floor(Math.random() * array.length);
+    // const candidate = Math.floor(Math.random() * array.length | 0);
+    const candidate = ~~(Math.random() * array.length);
+    // const candidate = Math.floor( Math.random() * (max - min) ) + min;
+    if (previousIndexes.indexOf(candidate) === -1) chosen = candidate;
+  }
+  previousIndexes.push(chosen);
+  if (previousIndexes.length > excludeHowMany) {
+    // previousIndexes.pop();
+    previousIndexes.shift();
+  }
+  log(previousIndexes)
+  return chosen;
+
+}
+

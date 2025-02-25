@@ -38,11 +38,12 @@ export function settings({
   if (interval) opts.interval = interval;
   if (triggerOnPlay !== undefined) opts.triggerOnPlay = triggerOnPlay;
   if (playBackwards !== undefined) opts.playBackwards = playBackwards;
-  if (playRandom !== undefined) opts.playRandom = playRandom;
   if (intervalArray.length > 0) opts.intervalArray = intervalArray;
-
-  // log('interval', interval);
-  log('settings', opts);
+  if (playRandom !== undefined) opts.playRandom = playRandom;
+  if (playRandom === true) {
+    index = randomArrayIndex(intervalArray);
+    previousIndexes.push(index);
+  }
 
   if (intervalCallback) onInterval = intervalCallback;
 }
@@ -77,24 +78,22 @@ export function intervalSet(ms) {
 
 function animate(timestamp) {
 
-  // log(timestamp);
-
   if (!playing) return;
 
   elapsedInterval = timestamp - zero; //// timestamp is always total continuous MS that the window has been open
 
   if (elapsedInterval > opts.interval) {
+
+    //// When interval has elapsed:
     
     if (opts.playRandom) {
-      //// Play randomly
 
-      // indicesToExcludeFromRandom.push(index);
-      // log(indicesToExcludeFromRandom);
-      // index = randomIndexExclude(0, opts.intervalArray.length - 1, indicesToExcludeFromRandom);
-      index = randomIndexFromArray(opts.intervalArray);
+      //// Play randomly
+      index = randomArrayIndexNoRepeats(opts.intervalArray);
 
     } else {
-      //// Play sequentially
+
+      //// Play sequentially...
 
       if (opts.playBackwards) {
 
@@ -108,7 +107,11 @@ function animate(timestamp) {
       }
     }
 
-    if (onInterval) onInterval(index, opts.intervalArray[index]);
+    //// Trigger callback if set
+
+    if (onInterval) {
+      onInterval(index, opts.intervalArray[index]);
+    }
 
     zero = document.timeline.currentTime;
   }
@@ -135,56 +138,23 @@ function nextIndexDown(index, array) {
   2. Shuffle the list of indexes first, then step through them sequentially
 */
 
-
-function randomIndexExclude_old1(min, max, exclude) {
-  var num = Math.floor(Math.random() * (max - min + 1)) + min;
-  // return (num === exclude) ? (num < max/2) ? num + 1 : num - 1 : num;
-  return (exclude.indexOf(num) === -1) ? (num < max/2) ? num + 1 : num - 1 : num;
-}
-
-function randomIndexExclude(min, max, exclude) {
-  let chosen
-  if (exclude.length > max - 3) {
-    console.error('too few options!');
-    return;
-  }
-  while (!chosen) {
-    const candidate = Math.floor( Math.random() * (max - min + 1) ) + min;
-    if (exclude.indexOf(candidate) === -1) chosen = candidate;
-  }
-  return chosen;
-}
-
-
-
 let previousIndexes = [];
-function randomIndexFromArray(array, excludeHowMany = 2) {
 
-  // if (excludeHowMany > array.length - 2) {
+function randomArrayIndexNoRepeats(array, excludeHowMany = 2) {
+
   if (array.length < 3) {
-    console.error('too many excluded:', excludeHowMany, ' from array of length:', array.length);
+    console.error('not enough options for random playback: ', array.length);
     return;
   }
-
-  const min = 0;
-  const max = array.length - 1;
-
-  log(array);
 
   let chosen = null;
   while (chosen === null) {
-    // const candidate = Math.floor( Math.random() * (max - min + 1) ) + min;
-    // const candidate = Math.floor(Math.random() * array.length);
-    const candidate = Math.floor(Math.random() * array.length | 0);
-    log(candidate, previousIndexes.indexOf(candidate));
-    // const candidate = ~~(Math.random() * array.length);
-    // const candidate = Math.floor( Math.random() * (max - min) ) + min;
+    const candidate = randomArrayIndex(array);
     if (previousIndexes.indexOf(candidate) === -1) chosen = candidate;
-    // if (previousIndexes.indexOf(candidate) < 0) chosen = candidate;
   }
+
   previousIndexes.push(chosen);
   if (previousIndexes.length > excludeHowMany) {
-    // previousIndexes.pop();
     previousIndexes.shift();
   }
   log(previousIndexes)
@@ -192,6 +162,6 @@ function randomIndexFromArray(array, excludeHowMany = 2) {
 
 }
 
-function randomArrayIndex(array) {
+function randomArrayIndex(array) { //// this is used by both randomArrayIndexNoRepeats() and in settings()
   return Math.floor(Math.random() * array.length | 0);
 }

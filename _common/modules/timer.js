@@ -105,3 +105,10 @@ function nextIndexUp(index, array) {
 function nextIndexDown(index, array) {
   return (index <= 0) ? array.length - 1 : index - 1;
 }
+
+
+function randomIndexExclude(min, max, exclude) {
+  var num = Math.floor(Math.random() * (max - min + 1)) + min;
+  // return (num === exclude) ? (num < max/2) ? num + 1 : num - 1 : num;
+  return (exclude.indexOf(num) === -1) ? (num < max/2) ? num + 1 : num - 1 : num;
+}

@@ -98,7 +98,7 @@ timer.settings({
   intervalArray: cardList,
   intervalCallback: flipIndex,
   // playBackwards: true,
-  // playRandom: true
+  playRandom: true
 });
 
 

@@ -120,7 +120,7 @@ function animate(timestamp) {
 //// Utils
 
 function nextIndexUp(index, array) {
-  log(index, array);
+  // log(index, array);
   return (index < array.length - 1) ? index + 1 : 0;
 }
 
@@ -160,7 +160,8 @@ function randomIndexExclude(min, max, exclude) {
 let previousIndexes = [];
 function randomIndexFromArray(array, excludeHowMany = 2) {
 
-  if (excludeHowMany > array.length - 3) {
+  // if (excludeHowMany > array.length - 2) {
+  if (array.length < 3) {
     console.error('too many excluded:', excludeHowMany, ' from array of length:', array.length);
     return;
   }
@@ -168,14 +169,18 @@ function randomIndexFromArray(array, excludeHowMany = 2) {
   const min = 0;
   const max = array.length - 1;
 
-  let chosen;
-  while (!chosen) {
+  log(array);
+
+  let chosen = null;
+  while (chosen === null) {
     // const candidate = Math.floor( Math.random() * (max - min + 1) ) + min;
     // const candidate = Math.floor(Math.random() * array.length);
-    // const candidate = Math.floor(Math.random() * array.length | 0);
-    const candidate = ~~(Math.random() * array.length);
+    const candidate = Math.floor(Math.random() * array.length | 0);
+    log(candidate, previousIndexes.indexOf(candidate));
+    // const candidate = ~~(Math.random() * array.length);
     // const candidate = Math.floor( Math.random() * (max - min) ) + min;
     if (previousIndexes.indexOf(candidate) === -1) chosen = candidate;
+    // if (previousIndexes.indexOf(candidate) < 0) chosen = candidate;
   }
   previousIndexes.push(chosen);
   if (previousIndexes.length > excludeHowMany) {
@@ -187,3 +192,6 @@ function randomIndexFromArray(array, excludeHowMany = 2) {
 
 }
 
+function randomArrayIndex(array) {
+  return Math.floor(Math.random() * array.length | 0);
+}

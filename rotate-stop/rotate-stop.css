@@ -22,6 +22,12 @@ body {
 /*  font-variation-settings: "wght" 375;*/
   font-feature-settings: 'ss01';
   font-weight: 500;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 main {
@@ -144,4 +150,34 @@ main {
 
 #display.playing #deck {
   background: #0fb;
+}
+
+#controls {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #0003;
+}
+
+
+
+/*//// SVG Pattern Backgrounds */
+
+#background {
+  display: block;
+  margin: 0;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100dvh;
+  z-index: 0;
+  --pattern-color1: #b3e9ff;
+  --pattern-color2: #ffff93;
+}
+
+#pattern-background {
+  background: var(--pattern-color1);
+  color: var(--pattern-color2);
 }

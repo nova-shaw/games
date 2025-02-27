@@ -4,15 +4,14 @@ const log = console.log;
 const opts = {
   interval: 1000,
   intervalArray: [],
-  triggerOnPlay: true,
+  triggerOnPlay: true, //// dont wait for first interval to finish before calling first onInterval callback
   playBackwards: false,
-  playRandom: false //// false = linear, true = random
+  playRandom: false
 }
 
 // Internal State
 let playing = false;
 let index = 0;
-let indicesToExcludeFromRandom = []; // keep records of last 2 random choices so as to not repeat them
 let raf; // reference for RAF, in case we need to cancel it
 let zero = document.timeline.currentTime;
 let elapsedInterval = 0;
@@ -24,28 +23,20 @@ let onInterval = null;
 
 //// Exports
 
-export function settings({
-  interval = null,
-  intervalArray = [],
-  intervalCallback = null,
-  triggerOnPlay, //// dont wait for first interval to finish before calling first onInterval callback
-  playBackwards,
-  playRandom,
-  // intervalLoop = false,
-  // callbacks = { interval: null, play: null, pause: null, end: null }
-} = {}) {
+export function settings({ interval, intervalArray, triggerOnPlay, playBackwards, playRandom, intervalCallback } = {}) {
 
-  if (interval) opts.interval = interval;
-  if (triggerOnPlay !== undefined) opts.triggerOnPlay = triggerOnPlay;
-  if (playBackwards !== undefined) opts.playBackwards = playBackwards;
-  if (intervalArray.length > 0) opts.intervalArray = intervalArray;
-  if (playRandom !== undefined) opts.playRandom = playRandom;
+  if (interval)      opts.interval = interval;
+  if (intervalArray) opts.intervalArray = intervalArray;
+  if (triggerOnPlay) opts.triggerOnPlay = triggerOnPlay;
+  if (playBackwards) opts.playBackwards = playBackwards;
+  if (playRandom)    opts.playRandom = playRandom;
+  if (intervalCallback) onInterval = intervalCallback;
+
   if (playRandom === true) {
     index = randomArrayIndex(intervalArray);
     previousIndexes.push(index);
   }
 
-  if (intervalCallback) onInterval = intervalCallback;
 }
 
 export function play() {
@@ -85,7 +76,6 @@ function animate(timestamp) {
   if (elapsedInterval > opts.interval) {
 
     //// When interval has elapsed:
-    
     if (opts.playRandom) {
 
       //// Play randomly
@@ -94,7 +84,6 @@ function animate(timestamp) {
     } else {
 
       //// Play sequentially...
-
       if (opts.playBackwards) {
 
         //// Play sequentially backwards
@@ -108,7 +97,6 @@ function animate(timestamp) {
     }
 
     //// Trigger callback if set
-
     if (onInterval) {
       onInterval(index, opts.intervalArray[index]);
     }
@@ -142,25 +130,29 @@ let previousIndexes = [];
 
 function randomArrayIndexNoRepeats(array, excludeHowMany = 2) {
 
+  //// Exit: random impossible for less than 3 items
+  //// TODO: better fallback would be just sequential ordering
   if (array.length < 3) {
     console.error('not enough options for random playback: ', array.length);
     return;
   }
 
+  //// Choose random index, excluding previousIndexes
   let chosen = null;
   while (chosen === null) {
     const candidate = randomArrayIndex(array);
     if (previousIndexes.indexOf(candidate) === -1) chosen = candidate;
   }
 
+  //// Remember chosen index, trim previousIndexes array from front if needed
   previousIndexes.push(chosen);
   if (previousIndexes.length > excludeHowMany) {
     previousIndexes.shift();
   }
-  log(previousIndexes)
+  
   return chosen;
-
 }
+
 
 function randomArrayIndex(array) { //// this is used by both randomArrayIndexNoRepeats() and in settings()
   return Math.floor(Math.random() * array.length | 0);

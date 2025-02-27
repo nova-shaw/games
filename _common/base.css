@@ -42,15 +42,6 @@ h2, h3 {
   margin: 0.25rem 0;
 }
 
-button {
-  appearance: none;
-  border: none;
-  font: inherit;
-  line-height: inherit;
-  background: transparent;
-  cursor: pointer;
-}
-
 img {
   display: block;
   margin: 0;
@@ -136,4 +127,45 @@ input[type='range']::-moz-range-thumb {
   width: 1rem;
   aspect-ratio: 1;
   border-radius: 1rem;
+}
+
+
+/*/////////////////////// Buttons */
+
+button {
+  appearance: none;
+  border: none;
+  font: inherit;
+  line-height: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.btn {
+  background: #fff;
+  border-radius: 0.25em;
+  min-width: 4em;
+}
+
+.btn.icon {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn.icon svg {
+  width: 1.5em;
+}
+
+.btn.icon .icon-play,
+.btn.icon .icon-pause {
+  display: block;
+}
+.btn.icon .icon-pause,
+.playing .btn.icon .icon-play {
+  display: none;
+}
+.playing .btn.icon .icon-pause {
+  display: block;
 }

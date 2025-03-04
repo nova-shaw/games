@@ -65,7 +65,7 @@ export function settings({ interval, intervalGap, maxIndex, triggerOnPlay, playB
 export function play() {
   playing = true;
   if (opts.triggerOnPlay && cbacks.onStart) cbacks.onStart(index);
-  previousIndexes.forEach( i => { cbacks.onEnd(i) }); //// Safety
+  // previousIndexes.forEach( i => { cbacks.onEnd(i) }); //// Safety
   zero = document.timeline.currentTime;
   animate(document.timeline.currentTime);
 }

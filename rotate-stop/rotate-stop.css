@@ -66,8 +66,11 @@ main {
   width: 100%;
   height: 100%;
   position: relative;
-  transition: all var(--flipms) ease-out;
   transform-style: preserve-3d;
+/*  transition: all var(--flipms) ease-out;*/
+/*  transition: transform var(--flipms) ease-out, transform-origin var(--flipms) ease-in;*/
+  transition: all var(--flipms) cubic-bezier(0.42, 0.05, 0.24, 1.2);
+  transform-origin: center left;
 }
 
 
@@ -143,7 +146,10 @@ main {
 .card.show .sides {
 /*  transform: rotateY(-180deg);*/
   transform: rotateY(180deg);
+  transform-origin: center center;
 /*  scale: 1.2;*/
+/*  transition: all var(--flipms) cubic-bezier(0.42, 0.05, 0.24, 1.2);*/
+  transition: all var(--flipms) cubic-bezier(0.83, 0.27, 0.53, 1.25);
 }
 
 

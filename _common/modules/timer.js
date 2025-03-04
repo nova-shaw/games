@@ -1,159 +1,174 @@
+/*
+  ALL THIS DOES is return an *index* at a given period (interval)
+  to any provided callback functions
+*/
 
-const log = console.log;
 
+//////////////////// Module-scoped globals
+
+//// Default Options
 const opts = {
-  interval: 1000,
-  intervalArray: [],
+  interval: 1000, //// How long (milliseconds) is each interval
+  intervalGap: 0, //// How long (milliseconds) is the gap between each interval
+  maxIndex: 10,
   triggerOnPlay: true, //// dont wait for first interval to finish before calling first onInterval callback
   playBackwards: false,
-  playRandom: false
+  playRandom: false //// false = linear, true = random
 }
 
-// Internal State
+//// Callbacks on Interval
+const cbacks = {
+  onStart: null,
+  onEnd: null
+}
+
+//// Internals
 let playing = false;
+
 let index = 0;
-let raf; // reference for RAF, in case we need to cancel it
+let previousIndexes = []; //// For random playback, keep track of recently used indexes so we don't repeat them
+const rememberPrevious = 2; //// How many recent indexes to remember and exclude from random playback
+
 let zero = document.timeline.currentTime;
-let elapsedInterval = 0;
-// let elapsedDuration = 0;
-
-// Callbacks
-let onInterval = null;
+let withinGap = false; //// is the current time within a gap or a specified interval?
+let elapsed = 0;
 
 
-//// Exports
+//////////////////// Exports
 
-export function settings({ interval, intervalArray, triggerOnPlay, playBackwards, playRandom, intervalCallback } = {}) {
+//// Settings
 
-  if (interval)      opts.interval = interval;
-  if (intervalArray) opts.intervalArray = intervalArray;
-  if (triggerOnPlay) opts.triggerOnPlay = triggerOnPlay;
-  if (playBackwards) opts.playBackwards = playBackwards;
-  if (playRandom)    opts.playRandom = playRandom;
-  if (intervalCallback) onInterval = intervalCallback;
+export function settings({ interval, intervalGap, maxIndex, triggerOnPlay, playBackwards, playRandom, intervalStartCallback, intervalEndCallback } = {}) {
 
-  if (playRandom === true) {
-    index = randomArrayIndex(intervalArray);
+  // Set options
+  if (interval != undefined)      opts.interval = interval;
+  if (intervalGap != undefined)   opts.intervalGap = intervalGap;
+  if (maxIndex != undefined)      opts.maxIndex = maxIndex;
+  if (triggerOnPlay != undefined) opts.triggerOnPlay = triggerOnPlay;
+  if (playBackwards != undefined) opts.playBackwards = playBackwards;
+  if (playRandom != undefined)    opts.playRandom = playRandom;
+
+  // On load or when not playing, if playback is set to random, choose random starting index (so not always starting on 0)
+  if (playing == false && playRandom == true) {
+    index = randomIntInclusive(0, opts.maxIndex);
     previousIndexes.push(index);
   }
 
+  // Set callbacks
+  if (intervalStartCallback) cbacks.onStart = intervalStartCallback;
+  if (intervalEndCallback)   cbacks.onEnd = intervalEndCallback;
+  
 }
+
+//// Playback Controls
 
 export function play() {
   playing = true;
-  if (opts.triggerOnPlay && onInterval) onInterval(index, opts.intervalArray[index]);
+  if (opts.triggerOnPlay && cbacks.onStart) cbacks.onStart(index);
+  previousIndexes.forEach( i => { cbacks.onEnd(i) }); //// Safety
   zero = document.timeline.currentTime;
   animate(document.timeline.currentTime);
 }
 
 export function pause() {
-  // log('PAUSE');
   playing = false;
-  // elapsedDuration += document.timeline.currentTime - zero;
-  // log(elapsedDuration);
 }
-
-/*export function reset() {
-  if (onPause) onPause();
-}*/
 
 export function intervalSet(ms) {
   opts.interval = ms;
-  log('interval set to', ms/1000);
+}
+
+export function gapSet(ms) {
+  opts.intervalGap = ms;
 }
 
 
 
-//// Internals
+//////////////////// Internals
 
+
+
+//// Main Animate Loop
 
 function animate(timestamp) {
 
-  if (!playing) return;
+  if (!playing) return; //// Exit animate loop if paused
 
-  elapsedInterval = timestamp - zero; //// timestamp is always total continuous MS that the window has been open
+  elapsed = timestamp - zero; //// timestamp is always total continuous MS that the window has been open
 
-  if (elapsedInterval > opts.interval) {
+  const limit = withinGap ? opts.intervalGap : opts.interval; //// Which are we timing, interval or intervalGap?
 
-    //// When interval has elapsed:
-    if (opts.playRandom) {
+  if (elapsed > limit) {
 
-      //// Play randomly
-      index = randomArrayIndexNoRepeats(opts.intervalArray);
+    // When gap is finished, call 'start' on next index
+    if (withinGap) {
+      index = chooseNextIndex();
+      cbacks.onStart(index);
 
+    // When interval is finished, call 'end' on current index
     } else {
-
-      //// Play sequentially...
-      if (opts.playBackwards) {
-
-        //// Play sequentially backwards
-        index = nextIndexDown(index, opts.intervalArray);
-
-      } else {
-
-        //// Play sequentially forwards
-        index = nextIndexUp(index, opts.intervalArray);
-      }
+      cbacks.onEnd(index);
     }
 
-    //// Trigger callback if set
-    if (onInterval) {
-      onInterval(index, opts.intervalArray[index]);
-    }
-
+    // Invert gap and reset zero
+    withinGap = !withinGap;
     zero = document.timeline.currentTime;
   }
 
-  raf = requestAnimationFrame(animate);
+  requestAnimationFrame(animate);
 }
 
 
-//// Utils
+//// Choosing the next index
 
-function nextIndexUp(index, array) {
-  // log(index, array);
-  return (index < array.length - 1) ? index + 1 : 0;
-}
+function chooseNextIndex() {
 
-function nextIndexDown(index, array) {
-  return (index <= 0) ? array.length - 1 : index - 1;
-}
+  let chosen;
 
+  //// Random playback is only possible if there are three or more options to choose from
+  if (opts.playRandom && (opts.maxIndex + 1) - rememberPrevious >= 3) {
+    chosen = nextIndexRandom(previousIndexes);
 
-/*
-  Ok, there are 2 ways to randomise the card chosen to flip:
-  1. Just pick a random index each time (while keeping a list of what's already been chosen and excluding them)
-  2. Shuffle the list of indexes first, then step through them sequentially
-*/
+  //// Linear playback
+  } else {
+    if (opts.playBackwards) {
+      chosen = nextIndexDown(index, opts.maxIndex);
 
-let previousIndexes = [];
-
-function randomArrayIndexNoRepeats(array, excludeHowMany = 2) {
-
-  //// Exit: random impossible for less than 3 items
-  //// TODO: better fallback would be just sequential ordering
-  if (array.length < 3) {
-    console.error('not enough options for random playback: ', array.length);
-    return;
+    } else {
+      chosen = nextIndexUp(index, opts.maxIndex);
+    }
   }
 
-  //// Choose random index, excluding previousIndexes
-  let chosen = null;
-  while (chosen === null) {
-    const candidate = randomArrayIndex(array);
-    if (previousIndexes.indexOf(candidate) === -1) chosen = candidate;
-  }
-
-  //// Remember chosen index, trim previousIndexes array from front if needed
+  //// Always remember chosen index, trim previousIndexes array from front if needed
   previousIndexes.push(chosen);
-  if (previousIndexes.length > excludeHowMany) {
+  if (previousIndexes.length > rememberPrevious) {
     previousIndexes.shift();
   }
-  
+
   return chosen;
 }
 
+function nextIndexUp(index, max) {
+  return (index < max) ? index + 1 : 0;
+}
 
-function randomArrayIndex(array) { //// this is used by both randomArrayIndexNoRepeats() and in settings()
-  return Math.floor(Math.random() * array.length | 0);
+function nextIndexDown(index, max) {
+  return (index <= 0) ? max : index - 1;
+}
+
+function nextIndexRandom(excludeArray) { //// Choose random index, excluding previousIndexes
+  let chosen = null;
+  while (chosen === null) {
+    const candidate = randomIntInclusive(0, opts.maxIndex);
+    if (excludeArray.indexOf(candidate) === -1) chosen = candidate;
+  }
+  return chosen;
+}
+
+//// Utils
+
+function randomIntInclusive(min, max) {
+  const minCeiled = Math.ceil(min);
+  const maxFloored = Math.floor(max);
+  return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled); // The maximum is inclusive and the minimum is inclusive
 }

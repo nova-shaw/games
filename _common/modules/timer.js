@@ -28,6 +28,7 @@ let playing = false;
 let index = 0;
 let previousIndexes = []; //// For random playback, keep track of recently used indexes so we don't repeat them
 const rememberPrevious = 2; //// How many recent indexes to remember and exclude from random playback
+let shown = [];
 
 let zero = document.timeline.currentTime;
 let withinGap = false; //// is the current time within a gap or a specified interval?
@@ -65,7 +66,9 @@ export function settings({ interval, intervalGap, maxIndex, triggerOnPlay, playB
 export function play() {
   playing = true;
   if (opts.triggerOnPlay && cbacks.onStart) cbacks.onStart(index);
+  console.log(previousIndexes);
   // previousIndexes.forEach( i => { cbacks.onEnd(i) }); //// Safety
+  // shown.forEach( i => { cbacks.onEnd(i) }); //// Safety
   zero = document.timeline.currentTime;
   animate(document.timeline.currentTime);
 }
@@ -108,6 +111,8 @@ function animate(timestamp) {
     // When interval is finished, call 'end' on current index
     } else {
       cbacks.onEnd(index);
+      shown.forEach( i => { cbacks.onEnd(i) });
+      shown = [];
     }
 
     // Invert gap and reset zero
@@ -139,8 +144,13 @@ function chooseNextIndex() {
     }
   }
 
+  shown.push(chosen);
+  console.log('shown', shown);
+
   //// Always remember chosen index, trim previousIndexes array from front if needed
+  console.log(previousIndexes);
   previousIndexes.push(chosen);
+  console.log(previousIndexes);
   if (previousIndexes.length > rememberPrevious) {
     previousIndexes.shift();
   }

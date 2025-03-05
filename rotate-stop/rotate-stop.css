@@ -14,7 +14,7 @@ html {
   --flipms: 600ms;
   --shadow: #0005;
   --card-color: #0bf;
-  --card-hover-color: #0ad;
+  /* --card-hover-color: #0ad; */
 }
 
 body {
@@ -57,6 +57,7 @@ main {
   /* Remove `perspective` if you don't want the 3D effect */
   perspective: 300px;
   perspective: 50vw;
+  perspective: 100vw;
   border-radius: 2vw;
   cursor: pointer;
 }
@@ -69,8 +70,11 @@ main {
   transform-style: preserve-3d;
 /*  transition: all var(--flipms) ease-out;*/
 /*  transition: transform var(--flipms) ease-out, transform-origin var(--flipms) ease-in;*/
-  transition: all var(--flipms) cubic-bezier(0.42, 0.05, 0.24, 1.2);
-  transform-origin: center left;
+  /* transition: all var(--flipms) cubic-bezier(0.42, 0.05, 0.24, 1.2); */
+  /* transition: all var(--flipms) cubic-bezier(0.42, 0.05, 0.26, 1.06); */
+  transition: all var(--flipms) cubic-bezier(0.79, 0.08, 0.46, 0.77);
+  /* transform-origin: center left; */
+  transform-origin: bottom center;
 }
 
 
@@ -93,10 +97,11 @@ main {
 
 .face {
   z-index: 10;
-  transform: rotateY(180deg);
+  transform: rotateX(180deg);
   box-shadow: 0 2vw 2vw -0.5vw var(--shadow);
   background: #fff;
   padding: 1vw;
+  pointer-events: none;
 }
 
 
@@ -134,7 +139,12 @@ main {
 /*  outline: 2px solid;*/
 /*  opacity: 0.8;*/
 /*  background-color: #0be;*/
-  --card-color: var(--card-hover-color);
+  /* --card-color: var(--card-hover-color); */
+}
+
+.card:hover .face,
+.card:hover .back {
+  outline: 0.5vw solid #000;
 }
 
 
@@ -144,12 +154,21 @@ main {
 }
 
 .card.show .sides {
-/*  transform: rotateY(-180deg);*/
-  transform: rotateY(180deg);
-  transform-origin: center center;
+/*  transform: rotateX(-180deg);*/
+  /* transform: rotateX(180deg) translateY(100%); */
+  rotate: x 180deg;
+  translate: 0 -100%;
+  transform-origin: bottom center;
 /*  scale: 1.2;*/
 /*  transition: all var(--flipms) cubic-bezier(0.42, 0.05, 0.24, 1.2);*/
-  transition: all var(--flipms) cubic-bezier(0.83, 0.27, 0.53, 1.25);
+  /* transition: all var(--flipms) cubic-bezier(0.83, 0.27, 0.53, 1.25); */
+  /* transition: all var(--flipms) cubic-bezier(0.83, 0.27, 0.58, 1); */
+/*   transition:
+    rotateX var(--flipms) cubic-bezier(0.83, 0.27, 0.58, 1),
+    translateY var(--flipms) cubic-bezier(0.83, 0.27, 0.58, 1),
+    transform-origin var(--flipms) cubic-bezier(0.83, 0.27, 0.58, 1); */
+  /* transition: rotate var(--flipms) linear, translate var(--flipms) linear; */
+  transition: rotate var(--flipms) linear, translate var(--flipms) cubic-bezier(0.59, 0, 0.58, 1);
 }
 
 

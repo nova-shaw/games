@@ -4,8 +4,10 @@ export const data = {
     course: 'kids',
     level: 'class5', // used to be called '2B'
     book: 'b',
-    number: 7
+    number: 7,
+    title: 'I like science.'
   },
+  basicqs: [ 10, 4 ],
   target: [
     `What's your favorite subject?`,
     `I like (science).`

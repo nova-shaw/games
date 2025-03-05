@@ -25,7 +25,7 @@ function buildDeck(data) {
     deck.appendChild(card);
   });
 
-  log(cardList);
+  // log(cardList);
 
   display.appendChild(deck);
 }
@@ -58,7 +58,7 @@ function buildCard(cardData) {
   sides.appendChild(back);
   card.appendChild(sides);
 
-  // card.addEventListener('click', flipCard);
+  card.addEventListener('click', flipCard);
 
   return card;
 }
@@ -66,7 +66,10 @@ function buildCard(cardData) {
 buildDeck(lessonData.data);
 
 
-
+function flipCard(e) {
+  const card = e.currentTarget;
+  card.classList.toggle('show');
+}
 
 
 
@@ -124,12 +127,12 @@ timer.settings({
 
 
 function showCard(index) {
-  log('show', index)
+  // log('show', index)
   cardList[index].classList.add('show');
 }
 
 function hideCard(index) {
-  log('hide', index)
+  // log('hide', index)
   cardList[index].classList.remove('show');
 }
 

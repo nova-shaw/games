@@ -206,3 +206,25 @@ main {
   background: var(--pattern-color1);
   color: var(--pattern-color2);
 }
+
+body,
+.card {
+  /* cursor: url(picker.png) 10 10, auto; */
+  /* cursor: url('#usagi-head1') 10 10, auto; */
+  /* cursor: url('../_common/media/cursor1.svg') 10 10, auto; */
+  /* cursor: url('../_common/media/cursor1.png') 0 0, auto; */
+  cursor: none;
+}
+
+#cursor {
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  width: 32px;
+  background: #999;
+  color: red;
+  translate: 40px 100px;
+  cursor: none;
+}

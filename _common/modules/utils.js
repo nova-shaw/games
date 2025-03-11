@@ -18,7 +18,21 @@ export function stripExtraSlashes(str) { //// Thanks: https://stackoverflow.com/
   return str2;
 }
 
-export function easeOutQuad(x) { // 0-1
+
+// Easing functions, all 0-1, thanks https://easings.net/
+
+export function easeInQuad(x) {
+  return x * x;
+}
+
+export function easeInCubic(x) {
+  return x * x * x;
+}
+
+export function easeOutQuad(x) {
   return 1 - (1 - x) * (1 - x);
 }
 
+export function easeOutCubic(x) {
+  return 1 - Math.pow(1 - x, 3);
+}

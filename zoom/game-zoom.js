@@ -1,4 +1,4 @@
-import { lerp, norm, easeOutQuad } from '../_common/modules/utils.js';
+import { lerp, norm, easeInQuad, easeInCubic, easeOutQuad, easeOutCubic } from '../_common/modules/utils.js';
 import { uiElement } from '../_common/modules/ui-element.js';
 import * as timer from '../_common/modules/timer.js';
 import * as lessonData from '../_lessons/class5_bookb_07.js';
@@ -107,7 +107,7 @@ range.addEventListener('input', e => {
 
 
 let playing = false;
-let animDuration = 3000;
+let animDuration = 5000;
 let animElapsed = 0;
 let elapsed = 0;
 let zero = 0;
@@ -130,9 +130,10 @@ function animate(timestamp) {
   // log(zero);
 
   // range.value = (animElapsed / animDuration) * 100;
-  range.value = (animElapsed / animDuration);
+  const per = (animElapsed / animDuration);
+  range.value = per;
 
-  doTheAnimation(range.value);
+  doTheAnimation(per);
 
 
   requestAnimationFrame(animate);
@@ -143,11 +144,11 @@ function animate(timestamp) {
   // playing = true;
   // animate(zero);
 })*/
-const maxZoom = 30;
+const maxZoom = 40;
 
 function doTheAnimation(per) {
-  log(per);
-  const inversePer = 100 - per
+  // log(per);
+  const inversePer = 1 - per
   // const val = norm(inversePer/100, 1, maxZoom);
   // const val = norm(inversePer/100, maxZoom, 1);
   // const val = norm(per/100, maxZoom, 1);
@@ -155,9 +156,16 @@ function doTheAnimation(per) {
   // const val = maxZoom * norm(inversePer/100, 1, maxZoom);
   // const val = maxZoom * norm(per/100, 1, maxZoom);
   // const val = maxZoom * per;
-  const factor = easeOutQuad()
-  const val = maxZoom * (inversePer/100) + 1;
-  log(per, val);
+  // const factor = easeOutQuad(inversePer);
+  // const factor = easeOutCubic(inversePer);
+  
+  // const val = maxZoom * (inversePer) + 1;
+
+  // const factor = easeInQuad(inversePer);
+  const factor = easeInCubic(inversePer);
+  const val = (maxZoom * factor) + 1;
+  
+  // log(per, val);
   // card.style.setProperty(`--zoom`, (10 - percent/10) + 1);
   card.style.setProperty(`--zoom`, val);
 }

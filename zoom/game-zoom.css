@@ -1,0 +1,208 @@
+
+@import url('../_common/css/base.css');
+
+@font-face {
+  font-family: 'Nunito';
+  src: url('../_common/fonts/Nunito-vf-wght.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-weight: 200 1000;
+
+}
+
+html {
+  --flipms: 600ms;
+  --shadow: #0005;
+  --card-color: #0bf;
+  /* --card-hover-color: #0ad; */
+}
+
+body {
+  font-family: 'Nunito';
+/*  font-variation-settings: "wght" 375;*/
+  font-feature-settings: 'ss01';
+  font-weight: 500;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+main {
+  width: 100%;
+}
+
+#deck {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  /* gap: 2%; */
+  width: 100%;
+  height: 100%;
+  background: #ddd;
+  padding: 2%;
+  user-select: none;
+}
+
+.card {
+  flex: 28% 0 0;
+  aspect-ratio: 4/3;
+/*  aspect-ratio: 1;*/
+  margin: 2%;
+  
+  /* Remove `perspective` if you don't want the 3D effect */
+  perspective: 300px;
+  perspective: 50vw;
+  perspective: 100vw;
+  border-radius: 2vw;
+  cursor: pointer;
+}
+
+
+.sides {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+/*  transition: all var(--flipms) ease-out;*/
+/*  transition: transform var(--flipms) ease-out, transform-origin var(--flipms) ease-in;*/
+  /* transition: all var(--flipms) cubic-bezier(0.42, 0.05, 0.24, 1.2); */
+  /* transition: all var(--flipms) cubic-bezier(0.42, 0.05, 0.26, 1.06); */
+  transition: all var(--flipms) cubic-bezier(0.79, 0.08, 0.46, 0.77);
+  /* transform-origin: center left; */
+  transform-origin: bottom center;
+}
+
+
+.face,
+.back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  overflow: hidden;
+  border-radius: 2vw;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+}
+
+.face {
+  z-index: 10;
+  transform: rotateX(180deg);
+  box-shadow: 0 2vw 2vw -0.5vw var(--shadow);
+  background: #fff;
+  padding: 1vw;
+  pointer-events: none;
+}
+
+
+.card .face img {
+/*  width: 100%;*/
+/*  height: 100%;*/
+/*  object-fit: contain;*/
+/*  padding: 10%;*/
+  flex: 100% 1 1;
+  overflow: hidden;
+  margin: 1vw 0;
+}
+
+.card .face p {
+/*  margin: 1vw 0 0 0;*/
+  margin: 0;
+  font-size: 1.25em;
+  font-size: 2.75vw;
+  font-weight: bold;
+}
+
+.back {
+  background: #0bf;
+  background-color: var(--card-color);
+  background-image: url('../_common/media/bg_circles.svg');
+  background-blend-mode: darken;
+/*  box-shadow: inset 0 0 0 1em #0bf, inset 0 0 0 1.2em #0003;*/
+/*  box-shadow: inset 0 0 0 1em #0bf;*/
+/*  box-shadow: 0 1vw 1vw -0.5vw var(--shadow), inset 0 0 0 2vw #0bf;*/
+  box-shadow: 0 1vw 1vw -0.5vw var(--shadow), inset 0 0 0 1.5vw var(--card-color);
+  background-size: 15vw;
+}
+
+.card:hover {
+/*  outline: 2px solid;*/
+/*  opacity: 0.8;*/
+/*  background-color: #0be;*/
+  /* --card-color: var(--card-hover-color); */
+}
+
+.card:hover .face,
+.card:hover .back {
+  outline: 0.5vw solid #000;
+}
+
+
+.card.show {
+  position: relative;
+  z-index: 10;
+}
+
+.card.show .sides {
+/*  transform: rotateX(-180deg);*/
+  /* transform: rotateX(180deg) translateY(100%); */
+  rotate: x 180deg;
+  translate: 0 -100%;
+  transform-origin: bottom center;
+/*  scale: 1.2;*/
+/*  transition: all var(--flipms) cubic-bezier(0.42, 0.05, 0.24, 1.2);*/
+  /* transition: all var(--flipms) cubic-bezier(0.83, 0.27, 0.53, 1.25); */
+  /* transition: all var(--flipms) cubic-bezier(0.83, 0.27, 0.58, 1); */
+/*   transition:
+    rotateX var(--flipms) cubic-bezier(0.83, 0.27, 0.58, 1),
+    translateY var(--flipms) cubic-bezier(0.83, 0.27, 0.58, 1),
+    transform-origin var(--flipms) cubic-bezier(0.83, 0.27, 0.58, 1); */
+  /* transition: rotate var(--flipms) linear, translate var(--flipms) linear; */
+  transition: rotate var(--flipms) linear, translate var(--flipms) cubic-bezier(0.59, 0, 0.58, 1);
+}
+
+
+
+#display.playing #deck {
+  background: #0fb;
+}
+
+#controls {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: #0003;
+}
+
+
+
+/*//// SVG Pattern Backgrounds */
+
+#background {
+  display: block;
+  margin: 0;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100dvh;
+  z-index: 0;
+  --pattern-color1: #b3e9ff;
+  --pattern-color2: #ffff93;
+}
+
+#pattern-background {
+  background: var(--pattern-color1);
+  color: var(--pattern-color2);
+}

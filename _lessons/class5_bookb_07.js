@@ -13,11 +13,11 @@ export const data = {
     `I like (science).`
   ],
   vocab: [
-    { text: 'art',     image: 'art.svg' },
-    { text: 'English', image: 'english.svg' },
-    { text: 'math',    image: 'math.svg' },
-    { text: 'music',   image: 'music.svg' },
-    { text: 'science', image: 'science.svg' }
+    { text: 'art',     slug: 'art',     image: 'art.svg' },
+    { text: 'English', slug: 'english', image: 'english.svg' },
+    { text: 'math',    slug: 'math',    image: 'math.svg' },
+    { text: 'music',   slug: 'music',   image: 'music.svg' },
+    { text: 'science', slug: 'science', image: 'science.svg' }
   ],
   listening: [
     {

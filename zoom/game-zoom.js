@@ -12,6 +12,7 @@ const mediaPath = `../_lessons/${lessonid}/`;
 
 const display = document.querySelector('#display');
 let card = null;
+let face = null;
 
 const cardList = [];
 
@@ -28,7 +29,7 @@ function buildDeck(data) {
   });
 
   // const card = buildCard(data.vocab[4]);
-  card = buildBlankCard().card;
+  const card = buildBlankCard().card;
   card.classList.add('blank');
   deck.appendChild(card);
   display.appendChild(deck);
@@ -73,7 +74,7 @@ function buildCard(cardData) {
   blank.face.appendChild(img);
   blank.face.appendChild(text);
 
-  // blank.card.addEventListener('click', startZoom);
+  face = blank.face;
 
   return blank.card;
 }
@@ -83,6 +84,10 @@ function buildBlankCard() {
   const face = uiElement({ type: 'div', classes: 'face' });
   card.appendChild(face);
   return { card: card, face: face };
+}
+
+function buildCardFace(cardData) {
+  
 }
 
 
@@ -100,31 +105,28 @@ function startZoom(e) {
 
 
 //// Play
+
+
 const range = document.querySelector('#rng_playback');
 
 range.addEventListener('pointerdown', e => {
   wasPlayingBeforePause = playing;
   playing = false;
-  startAt = lerp(e.currentTarget.value, 0, animDuration);
-  doTheAnimation(e.currentTarget.value);
+  setElapsedFromRange(e);
 });
 
 range.addEventListener('input', e => {
-  // log(playing);
-  
-  // log(e.currentTarget.value);
-  // animElapsed = lerp(e.currentTarget.value, 0, animDuration);
-  startAt = lerp(e.currentTarget.value, 0, animDuration);
-  doTheAnimation(e.currentTarget.value);
+  setElapsedFromRange(e);
 });
 
 range.addEventListener('pointerup', e => {
-  // log('up');
-  // log(wasPlayingBeforePause);
-  if (wasPlayingBeforePause == true) {
-    animPlay();
-  }
+  if (wasPlayingBeforePause) animPlay();
 });
+
+function setElapsedFromRange(e) {
+  startAt = lerp(e.currentTarget.value, 0, animDuration);
+  doTheAnimation(e.currentTarget.value);
+}
 
 
 let playing = false;
@@ -138,31 +140,27 @@ function animate(timestamp) {
 
   if (!playing) return;
 
+  requestAnimationFrame(animate);
 
-  const elapsed = timestamp - zero; // How many MS have elapsed since starting
-  animElapsed = startAt + elapsed;
-
+  animElapsed = startAt + (timestamp - zero);
 
   const per = (animElapsed / animDuration);
   range.value = per;
   doTheAnimation(per);
 
   if (animElapsed >= animDuration) {
-    // playing = false;
-    // animPause();
     animReset();
   }
-
-  requestAnimationFrame(animate);
 }
 
 
 
 const maxZoom = 40;
+const minZoom = 1;
 
 function doTheAnimation(per) { // `per` is float 0-1
   const factor = easeInQuart(1 - per); // Invert the percent and ease
-  const val = (maxZoom * factor) + 1;
+  const val = (maxZoom * factor) + minZoom;
   card.style.setProperty(`--zoom`, val);
 }
 

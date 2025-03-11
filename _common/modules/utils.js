@@ -17,3 +17,8 @@ export function stripExtraSlashes(str) { //// Thanks: https://stackoverflow.com/
   const str2 = str1.startsWith('/') ? str1.slice(1) : str1; //// remove any leading slash
   return str2;
 }
+
+export function easeOutQuad(x) { // 0-1
+  return 1 - (1 - x) * (1 - x);
+}
+

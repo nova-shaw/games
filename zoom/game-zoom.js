@@ -1,6 +1,6 @@
-
-import { uiElement } from '../_common/modules/ui-element.js'
-import * as timer from '../_common/modules/timer.js'
+import { lerp, norm, easeOutQuad } from '../_common/modules/utils.js';
+import { uiElement } from '../_common/modules/ui-element.js';
+import * as timer from '../_common/modules/timer.js';
 import * as lessonData from '../_lessons/class5_bookb_07.js';
 
 const log = console.log;
@@ -129,7 +129,8 @@ function animate(timestamp) {
   // animElapsed += elapsed;
   // log(zero);
 
-  range.value = (animElapsed / animDuration) * 100;
+  // range.value = (animElapsed / animDuration) * 100;
+  range.value = (animElapsed / animDuration);
 
   doTheAnimation(range.value);
 
@@ -142,10 +143,23 @@ function animate(timestamp) {
   // playing = true;
   // animate(zero);
 })*/
+const maxZoom = 30;
 
-function doTheAnimation(percent) {
-  // log(percent);
-  card.style.setProperty(`--zoom`, (10 - percent/10) + 1);
+function doTheAnimation(per) {
+  log(per);
+  const inversePer = 100 - per
+  // const val = norm(inversePer/100, 1, maxZoom);
+  // const val = norm(inversePer/100, maxZoom, 1);
+  // const val = norm(per/100, maxZoom, 1);
+  // const val = norm(per/100, 1, maxZoom);
+  // const val = maxZoom * norm(inversePer/100, 1, maxZoom);
+  // const val = maxZoom * norm(per/100, 1, maxZoom);
+  // const val = maxZoom * per;
+  const factor = easeOutQuad()
+  const val = maxZoom * (inversePer/100) + 1;
+  log(per, val);
+  // card.style.setProperty(`--zoom`, (10 - percent/10) + 1);
+  card.style.setProperty(`--zoom`, val);
 }
 
 

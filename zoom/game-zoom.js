@@ -101,113 +101,95 @@ function startZoom(e) {
 
 //// Play
 const range = document.querySelector('#rng_playback');
-range.addEventListener('input', e => {
-  // log(e.currentTarget.value);
-  animElapsed = lerp(e.currentTarget.value, 0, animDuration);
+
+range.addEventListener('pointerdown', e => {
+  wasPlayingBeforePause = playing;
+  playing = false;
+  startAt = lerp(e.currentTarget.value, 0, animDuration);
   doTheAnimation(e.currentTarget.value);
-})
+});
+
+range.addEventListener('input', e => {
+  // log(playing);
+  
+  // log(e.currentTarget.value);
+  // animElapsed = lerp(e.currentTarget.value, 0, animDuration);
+  startAt = lerp(e.currentTarget.value, 0, animDuration);
+  doTheAnimation(e.currentTarget.value);
+});
+
+range.addEventListener('pointerup', e => {
+  // log('up');
+  // log(wasPlayingBeforePause);
+  if (wasPlayingBeforePause == true) {
+    animPlay();
+  }
+});
 
 
 let playing = false;
 let animDuration = 2000;
 let animElapsed = 0;
-let startElapsed = 0;
-// let elapsed = 0;
+let startAt = 0;
 let zero = 0;
+let wasPlayingBeforePause = false;
 
 function animate(timestamp) {
 
-  if (!playing) {
-    startElapsed = animElapsed;
-    return;
-  }
+  if (!playing) return;
+
 
   const elapsed = timestamp - zero; // How many MS have elapsed since starting
-  
-  //// BAD: both of these add exponentially to the `animElapsed`
-  // animElapsed += elapsed;
-  // animElapsed = animElapsed + elapsed;
+  animElapsed = startAt + elapsed;
 
-  // animElapsed = animElapsed + (timestamp - zero);
-  animElapsed = startElapsed + (timestamp - zero);
-
-  if (animElapsed >= animDuration) {
-    playing = false;
-    // return;
-  }
-  
-  // log('t', timestamp, 'z', zero, 'elapsed', elapsed);
-  
-
-  // log('timestamp - zero', timestamp - zero);
-  // elapsed = timestamp - zero;
-  // animElapsed = timestamp - zero;
-  // animElapsed += timestamp - zero;
-  // animElapsed = animElapsed + (timestamp - zero);
-  // animElapsed += elapsed;
-  // log(zero);
-
-  log('animElapsed', animElapsed);
-  log('startElapsed', startElapsed);
 
   const per = (animElapsed / animDuration);
   range.value = per;
   doTheAnimation(per);
 
+  if (animElapsed >= animDuration) {
+    // playing = false;
+    // animPause();
+    animReset();
+  }
 
   requestAnimationFrame(animate);
 }
 
-/*document.body.addEventListener('dblclick', e => {
-  // zero = document.timeline.currentTime;
-  // playing = true;
-  // animate(zero);
-})*/
+
+
 const maxZoom = 40;
 
-function doTheAnimation(per) {
-  // log(per);
-  const inversePer = 1 - per
-  // const val = norm(inversePer/100, 1, maxZoom);
-  // const val = norm(inversePer/100, maxZoom, 1);
-  // const val = norm(per/100, maxZoom, 1);
-  // const val = norm(per/100, 1, maxZoom);
-  // const val = maxZoom * norm(inversePer/100, 1, maxZoom);
-  // const val = maxZoom * norm(per/100, 1, maxZoom);
-  // const val = maxZoom * per;
-  // const factor = easeOutQuad(inversePer);
-  // const factor = easeOutCubic(inversePer);
-  
-  // const val = maxZoom * (inversePer) + 1;
-
-  // const factor = easeInQuad(inversePer);
-  // const factor = easeInCubic(inversePer);
-  const factor = easeInQuart(inversePer);
-  // const factor = easeOutQuart(inversePer);
+function doTheAnimation(per) { // `per` is float 0-1
+  const factor = easeInQuart(1 - per); // Invert the percent and ease
   const val = (maxZoom * factor) + 1;
-  
-  // log(per, val);
-  // card.style.setProperty(`--zoom`, (10 - percent/10) + 1);
   card.style.setProperty(`--zoom`, val);
 }
 
 
 
 const btnPlay = document.querySelector('#btn_playtoggle');
-btnPlay.addEventListener('click', e => {
-
+btnPlay.addEventListener('click', () => {
   if (playing) {
-    playing = false;
-    // animElapsed += elapsed;
-    log('pause');
+    animPause();
   } else {
-    playing = true;
-    zero = document.timeline.currentTime;
-    animate(zero);
+    animPlay();
   }
-
 });
 
 function animPlay() {
-  
+  playing = true;
+  zero = document.timeline.currentTime;
+  animate(zero);
+}
+
+function animPause() {
+  startAt = animElapsed;
+  playing = false;
+}
+
+function animReset() {
+  startAt = 0;
+  animElapsed = 0;
+  playing = false;
 }

@@ -1,4 +1,4 @@
-import { lerp, norm, easeInQuad, easeInCubic, easeOutQuad, easeOutCubic } from '../_common/modules/utils.js';
+import { lerp, norm, easeInQuart, easeOutQuart, easeInCubic, easeOutQuad, easeOutCubic } from '../_common/modules/utils.js';
 import { uiElement } from '../_common/modules/ui-element.js';
 import * as timer from '../_common/modules/timer.js';
 import * as lessonData from '../_lessons/class5_bookb_07.js';
@@ -102,37 +102,56 @@ function startZoom(e) {
 //// Play
 const range = document.querySelector('#rng_playback');
 range.addEventListener('input', e => {
-  log(e.currentTarget.value);
+  // log(e.currentTarget.value);
+  animElapsed = lerp(e.currentTarget.value, 0, animDuration);
+  doTheAnimation(e.currentTarget.value);
 })
 
 
 let playing = false;
-let animDuration = 5000;
+let animDuration = 2000;
 let animElapsed = 0;
-let elapsed = 0;
+let startElapsed = 0;
+// let elapsed = 0;
 let zero = 0;
 
 function animate(timestamp) {
 
-  if (!playing) return;
+  if (!playing) {
+    startElapsed = animElapsed;
+    return;
+  }
+
+  const elapsed = timestamp - zero; // How many MS have elapsed since starting
+  
+  //// BAD: both of these add exponentially to the `animElapsed`
+  // animElapsed += elapsed;
+  // animElapsed = animElapsed + elapsed;
+
+  // animElapsed = animElapsed + (timestamp - zero);
+  animElapsed = startElapsed + (timestamp - zero);
 
   if (animElapsed >= animDuration) {
     playing = false;
     // return;
   }
+  
+  // log('t', timestamp, 'z', zero, 'elapsed', elapsed);
+  
+
   // log('timestamp - zero', timestamp - zero);
   // elapsed = timestamp - zero;
-  animElapsed = timestamp - zero;
+  // animElapsed = timestamp - zero;
   // animElapsed += timestamp - zero;
   // animElapsed = animElapsed + (timestamp - zero);
-  // log(animElapsed);
   // animElapsed += elapsed;
   // log(zero);
 
-  // range.value = (animElapsed / animDuration) * 100;
+  log('animElapsed', animElapsed);
+  log('startElapsed', startElapsed);
+
   const per = (animElapsed / animDuration);
   range.value = per;
-
   doTheAnimation(per);
 
 
@@ -162,7 +181,9 @@ function doTheAnimation(per) {
   // const val = maxZoom * (inversePer) + 1;
 
   // const factor = easeInQuad(inversePer);
-  const factor = easeInCubic(inversePer);
+  // const factor = easeInCubic(inversePer);
+  const factor = easeInQuart(inversePer);
+  // const factor = easeOutQuart(inversePer);
   const val = (maxZoom * factor) + 1;
   
   // log(per, val);
@@ -177,7 +198,8 @@ btnPlay.addEventListener('click', e => {
 
   if (playing) {
     playing = false;
-    animElapsed += elapsed;
+    // animElapsed += elapsed;
+    log('pause');
   } else {
     playing = true;
     zero = document.timeline.currentTime;

@@ -29,10 +29,18 @@ export function easeInCubic(x) {
   return x * x * x;
 }
 
+export function easeInQuart(x) {
+  return x * x * x * x;
+}
+
 export function easeOutQuad(x) {
   return 1 - (1 - x) * (1 - x);
 }
 
 export function easeOutCubic(x) {
   return 1 - Math.pow(1 - x, 3);
+}
+
+export function easeOutQuart(x) {
+  return 1 - Math.pow(1 - x, 4);
 }

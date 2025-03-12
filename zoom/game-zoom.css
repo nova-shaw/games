@@ -71,7 +71,9 @@ main {
   align-content: center;
   align-items: center;
 
-  --zoom-speed: 10s;
+  /* --zoom-speed: 10s; */
+  --zoom: 1;
+  --poi: 50% 50%;
 }
 
 
@@ -88,7 +90,7 @@ main {
   padding: 3%;
 }
 
-.card.blank .face {
+.face.blank {
   background: #6ca7ee;
 }
 
@@ -109,25 +111,22 @@ main {
   margin: 0;
   font-size: 10vw;
   font-weight: bold;
-  transition: translate 500ms ease-in-out var(--zoom-speed);
+  translate: 0 20vw;
+  /* transition: translate 500ms ease-in-out; */
+}
+.card .text.show {
+  translate: 0 0;
+  transition: translate 500ms ease-in-out;
 }
 
-
-
-
-.card.zoom {
-  
-}
-
-.card.zoom img {
-/*  scale: 12;*/
+.card img {
   scale: var(--zoom);
   transition: none;
+  /* transform-origin: 61% 37%; */
+  transform-origin: var(--poi);
 }
-.card.zoom .text {
-  translate: 0 200%;
-  transition: none;
-}
+
+
 
 
 

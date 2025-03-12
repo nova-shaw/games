@@ -13,6 +13,7 @@ const mediaPath = `../_lessons/${lessonid}/`;
 const display = document.querySelector('#display');
 let card = null;
 let face = null;
+let text = null;
 
 const cardList = [];
 
@@ -29,8 +30,9 @@ function buildDeck(data) {
   });
 
   // const card = buildCard(data.vocab[4]);
-  const card = buildBlankCard().card;
-  card.classList.add('blank');
+  // const card = buildBlankCard().card;
+  card = buildCard();
+  // card.classList.add('blank');
   deck.appendChild(card);
   display.appendChild(deck);
 }
@@ -50,44 +52,66 @@ function buildCardThumb(cardData) {
   return li;
 }
 
+
+
 function chooseCard(e) {
   const cardSlug = e.currentTarget.dataset.card;
   const cardData = lessonData.data.vocab.find( item => item.slug == cardSlug );
   // log(cardData);
   // log(cardSlug);
-  const newCard = buildCard(cardData);
+  
+  /*const newCard = buildCard(cardData);
   newCard.classList.add('zoom')
   const oldCard = document.querySelector('#deck .card');
   oldCard.replaceWith(newCard);
-  card = newCard;
+  card = newCard;*/
+
+
+  const face = buildCardFace(cardData);
+  const currentface = card.querySelector('.face');
+  text = face.querySelector('.text');
+  currentface.replaceWith(face);
+
+
+  if (cardData.poi) {
+    card.style.setProperty('--poi', `${cardData.poi[0]}% ${cardData.poi[1]}%`);
+  } else {
+    card.style.setProperty('--poi', `50% 50%`);
+  }
+  card.style.setProperty(`--zoom`, maxZoom);
+
+  animReset();
 }
 
 
 
 function buildCard(cardData) {
 
-  const blank = buildBlankCard();
-
-  const img  = uiElement({ type: 'img', attrs: { src: `${mediaPath}${cardData.image}` } });
-  const text = uiElement({ type: 'p', classes: 'text', text: cardData.text });
-
-  blank.face.appendChild(img);
-  blank.face.appendChild(text);
-
-  face = blank.face;
-
-  return blank.card;
-}
-
-function buildBlankCard() {
   const card = uiElement({ type: 'div', classes: 'card' });
-  const face = uiElement({ type: 'div', classes: 'face' });
+  const face = buildCardFace(cardData);
   card.appendChild(face);
-  return { card: card, face: face };
+
+  return card;
 }
 
-function buildCardFace(cardData) {
-  
+// function buildBlankCard() {
+//   const card = uiElement({ type: 'div', classes: 'card' });
+//   const face = uiElement({ type: 'div', classes: 'face blank' });
+//   card.appendChild(face);
+//   return card;
+// }
+
+function buildCardFace(cardData = null) {
+  const face = uiElement({ type: 'div', classes: 'face' });
+  if (cardData) {
+    const img  = uiElement({ type: 'img', attrs: { src: `${mediaPath}${cardData.image}` } });
+    const text = uiElement({ type: 'p', classes: 'text', text: cardData.text });
+    face.appendChild(img);
+    face.appendChild(text);
+  } else {
+    face.classList.add('blank');
+  }
+  return face;
 }
 
 
@@ -96,78 +120,34 @@ function buildCardFace(cardData) {
 buildDeck(lessonData.data);
 
 
-function startZoom(e) {
-  const card = e.currentTarget;
-  card.classList.toggle('zoom');
-}
 
 
 
-
-//// Play
-
-
-const range = document.querySelector('#rng_playback');
-
-range.addEventListener('pointerdown', e => {
-  wasPlayingBeforePause = playing;
-  playing = false;
-  setElapsedFromRange(e);
-});
-
-range.addEventListener('input', e => {
-  setElapsedFromRange(e);
-});
-
-range.addEventListener('pointerup', e => {
-  if (wasPlayingBeforePause) animPlay();
-});
-
-function setElapsedFromRange(e) {
-  startAt = lerp(e.currentTarget.value, 0, animDuration);
-  doTheAnimation(e.currentTarget.value);
-}
-
-
-let playing = false;
-let animDuration = 2000;
-let animElapsed = 0;
-let startAt = 0;
-let zero = 0;
-let wasPlayingBeforePause = false;
-
-function animate(timestamp) {
-
-  if (!playing) return;
-
-  requestAnimationFrame(animate);
-
-  animElapsed = startAt + (timestamp - zero);
-
-  const per = (animElapsed / animDuration);
-  range.value = per;
-  doTheAnimation(per);
-
-  if (animElapsed >= animDuration) {
-    animReset();
-  }
-}
-
-
+///////////////////////////////////////////////////////////////
+// Actual animation
 
 const maxZoom = 40;
 const minZoom = 1;
 
 function doTheAnimation(per) { // `per` is float 0-1
   const factor = easeInQuart(1 - per); // Invert the percent and ease
-  const val = (maxZoom * factor) + minZoom;
+  // const val = (maxZoom * factor) + minZoom;
+  const val = lerp(factor, minZoom, maxZoom);
   card.style.setProperty(`--zoom`, val);
+  text?.classList.toggle('show', per > 0.98);
 }
 
 
 
-const btnPlay = document.querySelector('#btn_playtoggle');
-btnPlay.addEventListener('click', () => {
+
+
+///////////////////////////////////////////////////////////////
+// Animation controls UI
+
+const animToggle = document.querySelector('#btn_playtoggle');
+const animRange = document.querySelector('#rng_playback');
+
+animToggle.addEventListener('click', () => {
   if (playing) {
     animPause();
   } else {
@@ -175,19 +155,86 @@ btnPlay.addEventListener('click', () => {
   }
 });
 
+animRange.addEventListener('pointerdown', e => {
+  playOnRelease = playing;
+  playing = false;
+  // animJump(e.currentTarget.value);
+  animScrub(e);
+});
+
+animRange.addEventListener('input', e => {
+  // animJump(e.currentTarget.value);
+  animScrub(e);
+});
+
+animRange.addEventListener('pointerup', e => {
+  if (playOnRelease) animPlay();
+});
+
+
+///////////////////////////////////////////////////////////////
+// Animation internals
+
+let duration = 10000;
+
+let playing = false;
+let elapsed = 0;
+let startAt = 0;
+let zero = 0;
+let playOnRelease = false;
+
+function animLoop(timestamp) {
+
+  if (!playing) return;
+
+  requestAnimationFrame(animLoop);
+
+  elapsed = startAt + (timestamp - zero);
+
+  const per = (elapsed / duration);
+  animRange.value = per;
+
+  doTheAnimation(per);
+
+  if (elapsed >= duration) {
+    // elapsed = duration;
+    animEnd();
+    // animReset();
+  }
+}
+
 function animPlay() {
   playing = true;
   zero = document.timeline.currentTime;
-  animate(zero);
+  animLoop(zero);
 }
 
 function animPause() {
-  startAt = animElapsed;
+  startAt = elapsed;
+  playing = false;
+}
+
+function animEnd() {
+  elapsed = duration;
+  animRange.value = 1;
+  doTheAnimation(1);
   playing = false;
 }
 
 function animReset() {
   startAt = 0;
-  animElapsed = 0;
+  // elapsed = 0;
+  animRange.value = 0;
   playing = false;
+}
+
+function animJump(per) {
+  startAt = lerp(per, 0, duration);
+  animRange.value = per;
+  doTheAnimation(per);
+}
+
+function animScrub(e) {
+  startAt = lerp(e.currentTarget.value, 0, duration);
+  doTheAnimation(e.currentTarget.value);
 }

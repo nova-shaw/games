@@ -73,11 +73,8 @@ function chooseCard(e) {
   currentface.replaceWith(face);
 
 
-  if (cardData.poi) {
-    card.style.setProperty('--poi', `${cardData.poi[0]}% ${cardData.poi[1]}%`);
-  } else {
-    card.style.setProperty('--poi', `50% 50%`);
-  }
+  const poi = (cardData.poi) ? cardData.poi : [50, 50];
+  card.style.setProperty('--poi', `${poi[0]}% ${poi[1]}%`)
   card.style.setProperty(`--zoom`, maxZoom);
 
   animReset();
@@ -145,7 +142,8 @@ function doTheAnimation(per) { // `per` is float 0-1
 // Animation controls UI
 
 const animToggle = document.querySelector('#btn_playtoggle');
-const animRange = document.querySelector('#rng_playback');
+const animRange  = document.querySelector('#rng_playback');
+const animReveal = document.querySelector('#btn_reveal');
 
 animToggle.addEventListener('click', () => {
   if (playing) {
@@ -159,24 +157,31 @@ animRange.addEventListener('pointerdown', e => {
   playOnRelease = playing;
   playing = false;
   // animJump(e.currentTarget.value);
-  animScrub(e);
+  animJumpFromRange(e);
 });
 
 animRange.addEventListener('input', e => {
   // animJump(e.currentTarget.value);
-  animScrub(e);
+  animJumpFromRange(e);
 });
 
 animRange.addEventListener('pointerup', e => {
   if (playOnRelease) animPlay();
 });
 
+animReveal.addEventListener('click', e => {
+  // duration = 1000;
+  animPlay(1000);
+})
+
 
 ///////////////////////////////////////////////////////////////
 // Animation internals
 
-let duration = 10000;
+const durationMain = 10000;
+// let durationOnce = null;
 
+let duration = durationMain;
 let playing = false;
 let elapsed = 0;
 let startAt = 0;
@@ -203,25 +208,32 @@ function animLoop(timestamp) {
   }
 }
 
-function animPlay() {
+function animPlay(durationOnce = null) {
+  if (durationOnce) {
+    startAt = durationOnce * (elapsed / duration);
+    duration = durationOnce;
+  }
   playing = true;
   zero = document.timeline.currentTime;
   animLoop(zero);
 }
 
 function animPause() {
+  duration = durationMain;
   startAt = elapsed;
   playing = false;
 }
 
 function animEnd() {
-  elapsed = duration;
+  duration = durationMain;
+  elapsed = 0;
   animRange.value = 1;
   doTheAnimation(1);
   playing = false;
 }
 
 function animReset() {
+  duration = durationMain;
   startAt = 0;
   // elapsed = 0;
   animRange.value = 0;
@@ -234,7 +246,7 @@ function animJump(per) {
   doTheAnimation(per);
 }
 
-function animScrub(e) {
+function animJumpFromRange(e) { // Same as `animJump` but doesn't set UI range value
   startAt = lerp(e.currentTarget.value, 0, duration);
   doTheAnimation(e.currentTarget.value);
 }

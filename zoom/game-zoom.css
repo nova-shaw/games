@@ -7,13 +7,12 @@
   font-weight: normal;
   font-style: normal;
   font-weight: 200 1000;
-
 }
 
 html {
   --flipms: 600ms;
-  --shadow: #0005;
-  --card-color: #0bf;
+  --shadow: #0002;
+  --card-color: #6ca7ee;
   /* --card-hover-color: #0ad; */
 }
 
@@ -58,7 +57,6 @@ main {
   margin: 2%;
   
   border-radius: 5vw;
-  cursor: pointer;
 
   background: #fff;
   width: 50%;
@@ -70,6 +68,8 @@ main {
   justify-content: center;
   align-content: center;
   align-items: center;
+
+  box-shadow: 0 2vw 1vw -0.5vw var(--shadow);
 
   /* --zoom-speed: 10s; */
   --zoom: 1;
@@ -91,7 +91,7 @@ main {
 }
 
 .face.blank {
-  background: #6ca7ee;
+  background: var(--card-color);
 }
 
 

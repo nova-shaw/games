@@ -1,5 +1,7 @@
 import { lerp } from './utils.js';
 
+// const log = console.log;
+
 let animDuration = 1000;
 let animCallback = null
 let animToggle   = null;
@@ -96,6 +98,7 @@ export function play(durationOnce = null) {
 export function pause() {
   duration = animDuration;
   startAt = elapsed;
+  // log(startAt);
   playing = false;
 }
 
@@ -122,5 +125,6 @@ export function jump(per) {
 
 function jumpFromRange(e) { // Same as `jump()` but doesn't set UI range value
   startAt = lerp(e.currentTarget.value, 0, duration);
+  elapsed = startAt;
   animCallback(e.currentTarget.value);
 }

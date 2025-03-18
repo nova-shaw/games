@@ -61,7 +61,8 @@ main {
 /*  border-radius: 5vw;*/
   border-radius: 4em; /* temp just to get it working for demo */
 
-  background: #fff;
+/*  background: #fff;*/
+  background: #ecf9ff;
   width: 50%;
   overflow: hidden;
 

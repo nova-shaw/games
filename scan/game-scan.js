@@ -85,6 +85,11 @@ function buildCardFace(cardData = null) {
     face.appendChild(img);
     face.appendChild(text);
 
+    const imgForSanner = img.cloneNode(false);
+    const scanImageSVG = scanImage.querySelector('img');
+    scanImageSVG.replaceWith(imgForSanner);
+    // scanImage.appendChild(imgForSanner);
+
   } else {
     face.classList.add('blank');
   }
@@ -100,7 +105,7 @@ buildDeck(lessonData.data);
 ///////////////////////////////////////////////////////////////
 // Actual animation
 
-const maxZoom = 40;
+const maxZoom = 20;
 const minZoom = 1;
 
 function zoomOutSlowly(per) { // `per` is float 0-1
@@ -149,3 +154,46 @@ btnIncorrect.addEventListener('click', () => {
     setTimeout( () => { document.body.dataset.result = 'incorrect'; }, 100);
   }
 });
+
+
+
+
+
+///////////////////////////////////////////////////////////////
+// Scan panel dragging
+
+const scanner = document.querySelector('#scanner');
+const scanFrame = document.querySelector('#scan-frame');
+const scanImage = document.querySelector('#scan-image');
+
+let pointerDown = false;
+let scannerRect;
+
+scanner.addEventListener('pointerdown', e => {
+  scannerRect = scanner.getBoundingClientRect();
+  pointerDown = true;
+  // log(e);
+  // log(e.offsetX, e.offsetY);
+  convertToPercent({ x: e.offsetX, y: e.offsetY });
+})
+
+scanner.addEventListener('pointermove', e => {
+  if (pointerDown) {
+    // log(e.offsetX, e.offsetY);
+    convertToPercent({ x: e.offsetX, y: e.offsetY });
+  }
+});
+
+document.addEventListener('pointerup', e => {
+  pointerDown = false;
+});
+
+function convertToPercent(coords) {
+  // log(coords);
+  const perX = coords.x / scannerRect.width * 100;
+  const perY = coords.y / scannerRect.height * 100;
+  // scanFrame.style.translate = `${perX}% ${perY}%`;
+  scanFrame.style.translate = `${coords.x}px ${coords.y}px`;
+
+  card.style.setProperty('--poi', `${perX}% ${perY}%`);
+}

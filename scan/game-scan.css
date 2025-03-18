@@ -61,7 +61,8 @@ main {
 /*  border-radius: 5vw;*/
   border-radius: 4em; /* temp just to get it working for demo */
 
-  background: #fff;
+/*  background: #fff;*/
+  background: #e1f7f0;
   width: 50%;
   overflow: hidden;
 
@@ -143,6 +144,13 @@ main {
   background: #0003;
   padding: 0.5em;
   z-index: 3;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  width: 24em; /*for #scanner - aspect-ratio: 1;*/
+  /*width: 28em;*/ /*for #scanner - aspect-ratio: 4/3;*/
 }
 
 #card-chooser {
@@ -150,21 +158,22 @@ main {
   margin: 0;
   list-style: none;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: 0.5em;
+/*  width: 4em;*/
 }
 
 .card-thumb {
   background: #fff;
-  padding: 1vw;
+  padding: 0.25em 0.5em;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 0.5em;
+  gap: 1em;
   cursor: pointer;
-  aspect-ratio: 1;
-  height: 6em;
+/*  aspect-ratio: 1;*/
+/*  width: 6em;*/
   overflow: hidden;
   border-radius: 0.5em;
 }
@@ -173,16 +182,64 @@ main {
   outline: 0.5vw solid #000;
 }
 
+.card-thumb * {
+  pointer-events: none;
+  user-select: none;
+}
+
 .card-thumb img {
-  width: 3em;
+  width: 2em;
   aspect-ratio: 1;
 }
 
 .card-thumb .text {
   margin: 0;
   width: 100%;
-  text-align: center;
+  text-align: left;
   line-height: 1;
+}
+
+#control-buttons {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  gap: inherit;
+  user-select: none;
+}
+
+
+
+/*////////// Scanner*/
+
+#scanner {
+  cursor: pointer;
+  background: #fff;
+  background: #fff;
+  flex: 30% 1 1;
+  aspect-ratio: 1;
+/*  aspect-ratio: 4/3;*/
+  border-radius: 0.5em;
+  overflow: hidden;
+  padding: 2em;
+  position: relative;
+}
+
+#scan-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  aspect-ratio: 4/3;
+  width: 3em;
+  border: 3px solid red;
+  pointer-events: none;
+  user-select: none;
+  transform: translate(-50%, -50%);
+  translate: 50% 50%;
+}
+
+#scan-image {
+  pointer-events: none;
+  user-select: none;
 }
 
 
@@ -198,8 +255,10 @@ main {
   width: 100vw;
   height: 100dvh;
   z-index: 0;
-  --pattern-color1: #b3e9ff;
-  --pattern-color2: #ffff93;
+/*  --pattern-color1: #8bffe0;*/
+/*  --pattern-color2: #fb93ff;*/
+  --pattern-color1: #8bc2ff;
+  --pattern-color2: #b193ff;
 }
 
 #pattern-background {
@@ -212,12 +271,16 @@ main {
 /* //// temp just to get it working for demo */
 
 #btn_correct {
+  min-width: 2em;
   font-weight: bold;
-  color: green;
+  background-color: green;
+  color: #fff;
 }
 #btn_incorrect {
+  min-width: 2em;
   font-weight: bold;
-  color: red;
+  background-color: red;
+  color: #fff;
 }
 
 svg#result-stamp {
@@ -236,7 +299,7 @@ svg#result-stamp {
     scale: 2;
     opacity: 0.2;
 /*    transition: all 200ms ease-in;*/
-    transition: all 300ms cubic-bezier(0.74, 1.91, 0.56, 0.59);
+    transition: all 200ms cubic-bezier(0.74, 1.91, 0.56, 0.59);
 }
 
 svg#result-stamp g {

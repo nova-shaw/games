@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Uncover</title>
 
-  <script src="./uncover.js" type="module"></script>
+  <!-- <script src="./uncover.js" type="module"></script> -->
+  <script src="./uncover.js" defer></script>
   <link href="./uncover.css" rel="stylesheet" type="text/css">
 </head>
 <body>
@@ -14,16 +15,23 @@
     <img id="image" src="../../convert-content-media/lessons/5a-01-L01.jpg">
 
     <div id="cards">
-      <div class="card"></div>
-      <div class="card"></div>
-      <div class="card"></div>
-      <div class="card focus"></div>
-      <div class="card"></div>
-      <div class="card"></div>
-      <div class="card"></div>
-      <div class="card"></div>
-      <div class="card"></div>
+      <div class="card show"></div>
+      <div class="card show"></div>
+      <div class="card show"></div>
+      <div class="card show"></div>
+      <div class="card show"></div>
+      <div class="card show"></div>
+      <div class="card show"></div>
+      <div class="card show"></div>
+      <div class="card show"></div>
     </div>
+
+    <div id="controls">
+      <button id="playtoggle">></button>
+      <button id="reset">Reset</button>
+      <button id="reveal">Show</button>
+    </div>
+
   </main>
 </body>
 </html>

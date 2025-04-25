@@ -12,25 +12,23 @@ let playing = false;
 const interval = setInterval( () => {
   if (!playing) return;
   pickCard();
-}, 300);
+}, 100);
 
 
 function pickCard() {
   if (card) card.classList.remove('focus'); // Remove focus on previous card
 
   if (cardArray.length > 3) {
+    index = randomIndexExclude(cardArray.length - 1, indexHistory);
     if (indexHistory.length == 2) indexHistory.pop(); // Remove last item in array
-    indexHistory.unshift(
-      randomIndexExclude(cardArray.length - 1, indexHistory) // Add new index to start
-    );
+    indexHistory.unshift(index); // Add new index to start
 
   } else if (cardArray.length > 1) {
-    indexHistory = [
-      randomIndexExclude(cardArray.length - 1, indexHistory) // Array is single value (new index)
-    ];
+    index = randomIndexExclude(cardArray.length - 1, indexHistory);
+    indexHistory = [index];
   
   } else {
-    indexHistory = [0]; // Array is single value of 0
+    indexHistory = [0];
   }
   log(indexHistory);
 
@@ -72,6 +70,7 @@ function randomIntInclusive(min, max) {
 
 const btnPlay = document.querySelector('#playtoggle');
 btnPlay.addEventListener('click', e => {
+  // log(e);
   if (playing) {
     playing = false;
     uncoverCard();
@@ -80,20 +79,11 @@ btnPlay.addEventListener('click', e => {
   }
 })
 
-const btnReset = document.querySelector('#reset');
-btnReset.addEventListener('click', e => {
-  indexHistory = [];
-  card = null;
-  playing = false;
-  const allCards = document.querySelectorAll('.card');
-  allCards.forEach( c => c.classList = ' card show' );
-})
 
-const btnReveal = document.querySelector('#reveal');
-btnReveal.addEventListener('click', e => {
-  indexHistory = [];
-  card = null;
-  playing = false;
-  // const allCards = document.querySelectorAll('.card');
-  cardArray.forEach( c => c.classList.remove('show') );
-})
+function fillArrayConsecutive(max, startZero = true) {
+  // return Array(max).fill().map((_, index) => index + 1);
+  // return [...Array(max).keys()].map( index => index + 1);
+  return Array(max).fill().map((k, i) => (startZero) ? i : i + 1);
+}
+
+// log(fillArrayConsecutive(cardArray.length));

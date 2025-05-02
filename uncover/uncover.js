@@ -12,7 +12,7 @@ let playing = false;
 const interval = setInterval( () => {
   if (!playing) return;
   pickCard();
-}, 300);
+}, 100);
 
 
 function pickCard() {

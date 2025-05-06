@@ -1,9 +1,6 @@
 
-
-import { Timer } from '../_common/modules/timer.js';
-import * as choose from '../_common/modules/choose.js';
-import { lerp, easeOutQuad } from '../_common/modules/utils.js';
-
+import * as timer from '../_common/modules/timer.js'
+import * as mouse from '../_common/modules/mouse.js'
 import * as lessonData from '../_lessons/class5_bookb_07.js';
 
 const log = console.log;

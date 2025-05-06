@@ -26,7 +26,7 @@ const timerChoose = new Timer(
   onPause,
   onCancel
 );
-const speed = { min: 80, max: 1000};
+const speed = { min: 80, max: 1000}; // DOM slider is normalised value (ie 0-1 float)
 updateSpeedFromSlider();
 
 
@@ -40,6 +40,7 @@ function onStart() {
   board.classList.add('running');
   btnCancel.toggleAttribute('disabled', false);
 }
+
 
 function onPause() {
   // Indicate the current card is chosen, animate out
@@ -59,6 +60,7 @@ function onPause() {
   }
 }
 
+
 function onCancel() {
   // Remove focus style without choosing
   if (index != null) cardParent.children[index].classList.remove('focus');
@@ -68,8 +70,9 @@ function onCancel() {
   btnCancel.toggleAttribute('disabled', true);
 }
 
+
 let index = null;
-function chooseNext(ts) { 
+function chooseNext() { 
   // Remove focus from last focused card
   if (index != null) cardParent.children[index].classList.remove('focus');
 
@@ -77,7 +80,7 @@ function chooseNext(ts) {
   // index = choose.next();
   // index = choose.nextReverse();
 
-  // Add focus style to element at index
+  // Add focus style to element at chosen index
   if (index != null) cardParent.children[index].classList.add('focus');
 }
 
@@ -90,9 +93,11 @@ btnPlay.addEventListener('click', e => {
   timerChoose.toggle();
 });
 
+
 btnCancel.addEventListener('click', e => {
   timerChoose.cancel();
 });
+
 
 btnReset.addEventListener('click', e => {
   timerChoose.cancel();
@@ -111,6 +116,7 @@ btnReset.addEventListener('click', e => {
   btnReveal.toggleAttribute('disabled', false);
 });
 
+
 btnReveal.addEventListener('click', e => {
   timerChoose.cancel();
 
@@ -126,22 +132,11 @@ btnReveal.addEventListener('click', e => {
 
 
 rngSpeed.addEventListener('input', updateSpeedFromSlider);
-/*rngSpeed.addEventListener('input', e => {
-  // log(e.target.value, e.target.max);
-  const val = e.target.value;
-  const speedRange = speed.max - speed.min;
-  const valShaped = (speedRange - easeOutQuad(val) * speedRange) + speed.min;
-  timerChoose.updateInterval(0, valShaped);
-  // timerChoose.updateInterval(0, (Number(e.target.max) - e.target.value) + Number(e.target.min));
-});*/
 
+// Needs to be it's own function to allow timer to update from UI slider on page load
 function updateSpeedFromSlider() {
   const shapedValue = ((speed.max - speed.min) - easeOutQuad(rngSpeed.value) * (speed.max - speed.min)) + speed.min;
   timerChoose.updateInterval(0, shapedValue);
 }
 
-
-/*function normToSpeed(normalised) {
-  return ((speed.max - speed.min) - easeOutQuad(normalised) * (speed.max - speed.min)) + speed.min;
-}*/
 

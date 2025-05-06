@@ -68,7 +68,7 @@ function randomIntInclusive(min, max) {
 }
 
 
-////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
 
 const btnPlay = document.querySelector('#playtoggle');
 btnPlay.addEventListener('click', e => {

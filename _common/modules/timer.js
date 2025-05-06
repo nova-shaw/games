@@ -48,7 +48,7 @@ export class Timer {
   }
 
   updateInterval(index, value) {
-    console.log(value);
+    // console.log(value);
     this.intervals[index].ms = value;
   }
 

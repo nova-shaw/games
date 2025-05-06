@@ -1,6 +1,7 @@
 
 import { Timer } from '../_common/modules/timer.js';
 import * as choose from '../_common/modules/choose.js';
+import { lerp, easeOutQuad } from '../_common/modules/utils.js';
 
 const log = console.log;
 
@@ -25,6 +26,8 @@ const timerChoose = new Timer(
   onPause,
   onCancel
 );
+const speed = { min: 80, max: 1000};
+updateSpeedFromSlider();
 
 
 ///////////////////////////////////////////////////////////////
@@ -122,9 +125,23 @@ btnReveal.addEventListener('click', e => {
 })
 
 
-rngSpeed.addEventListener('input', e => {
+rngSpeed.addEventListener('input', updateSpeedFromSlider);
+/*rngSpeed.addEventListener('input', e => {
   // log(e.target.value, e.target.max);
-  // timerChoose.updateInterval(0, e.target.value);
-  timerChoose.updateInterval(0, (Number(e.target.max) - e.target.value) + Number(e.target.min));
-})
+  const val = e.target.value;
+  const speedRange = speed.max - speed.min;
+  const valShaped = (speedRange - easeOutQuad(val) * speedRange) + speed.min;
+  timerChoose.updateInterval(0, valShaped);
+  // timerChoose.updateInterval(0, (Number(e.target.max) - e.target.value) + Number(e.target.min));
+});*/
+
+function updateSpeedFromSlider() {
+  const shapedValue = ((speed.max - speed.min) - easeOutQuad(rngSpeed.value) * (speed.max - speed.min)) + speed.min;
+  timerChoose.updateInterval(0, shapedValue);
+}
+
+
+/*function normToSpeed(normalised) {
+  return ((speed.max - speed.min) - easeOutQuad(normalised) * (speed.max - speed.min)) + speed.min;
+}*/
 

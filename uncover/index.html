@@ -4,34 +4,37 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Uncover</title>
-
   <script src="./uncover.js" type="module"></script>
-  <!-- <script src="./uncover.js" defer></script> -->
   <link href="./uncover.css" rel="stylesheet" type="text/css">
 </head>
 <body>
-  <main>
-    
-    <img id="image" src="../../convert-content-media/lessons/5a-01-L01.jpg">
+
+  <main id="board">
 
     <div id="cards">
-      <div class="card show"></div>
-      <div class="card show"></div>
-      <div class="card show"></div>
-      <div class="card show"></div>
-      <div class="card show"></div>
-      <div class="card show"></div>
-      <div class="card show"></div>
-      <div class="card show"></div>
-      <div class="card show"></div>
+      <div class="card show">1</div>
+      <div class="card show">2</div>
+      <div class="card show">3</div>
+      <div class="card show">4</div>
+      <div class="card show">5</div>
+      <div class="card show">6</div>
+      <div class="card show">7</div>
+      <div class="card show">8</div>
+      <div class="card show">9</div>
     </div>
 
     <div id="controls">
-      <button id="playtoggle">Play</button>
-      <button id="reset">Reset</button>
-      <button id="reveal">Show</button>
+      <button id="btn-play">
+        <span class="txt-start">Start</span>
+        <span class="txt-reveal">Reveal</span>
+      </button>
+      <button id="btn-cancel" disabled>Cancel</button>
+      <button id="btn-reset">R</button>
+      <button id="btn-reveal">A</button>
+      <input type="range" name="rng-Speed" id="rng-Speed" min="100" max="800" value="300">
+      <!-- <input type="range" name="rng-Speed" id="rng-Speed" min="1000" max="100" value="300"> -->
     </div>
-
   </main>
+
 </body>
 </html>

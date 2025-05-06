@@ -1,95 +1,130 @@
 
-import { Timer } from '../_common/modules/timer-class.js';
+import { Timer } from '../_common/modules/timer.js';
+import * as choose from '../_common/modules/choose.js';
 
 const log = console.log;
 
-
-let cards = document.querySelector('#cards');
-let cardArray = document.querySelectorAll('.card.show');
-let card = null;
-let index = null;
-let indexHistory = [];
-// let card = null;
-let running = false;
+const board = document.querySelector('#board');
+const btnPlay   = document.querySelector('#btn-play');
+const btnCancel = document.querySelector('#btn-cancel');
+const btnReset  = document.querySelector('#btn-reset');
+const btnReveal = document.querySelector('#btn-reveal');
+const rngSpeed  = document.querySelector('#rng-Speed');
 
 
-function pickCard(ts) {
+// Set up Chooser
+const cardParent = document.querySelector('#cards');
+const cardList = document.querySelectorAll('.card');
+choose.setup(cardList.length);
 
-  // if (index != null) cards.children[index].classList.remove('picked');
-  cardArray.forEach( c => c.classList.remove('picked') );
-  
-  // log('pickCard', ts);
-  index = randomIndexExclude(cardArray.length-1, indexHistory);
-  if (indexHistory.length > 2) indexHistory.shift();
-  indexHistory.push(index);
 
-  // log(index, indexHistory);
-  // log(card);
-  
-  // cards.children[indexHistory[indexHistory.length-1]].classList.remove('picked');
+// Set up Timer
+const timerChoose = new Timer(
+  [{ ms: 100, fn: chooseNext }],
+  onStart,
+  onPause,
+  onCancel
+);
 
-  card = cards.children[index];  
-  card.classList.add('picked');
+
+///////////////////////////////////////////////////////////////
+// Timer Callbacks
+
+function onStart() {
+  chooseNext();
+
+  // Enable play-state buttons
+  board.classList.add('running');
+  btnCancel.toggleAttribute('disabled', false);
 }
 
+function onPause() {
+  // Indicate the current card is chosen, animate out
+  if (index != null) cardParent.children[index].classList.replace('show', 'hide');
 
-const btnPlay = document.querySelector('#playtoggle');
-const btnReset = document.querySelector('#reset');
-const btnReveal = document.querySelector('#reveal');
+  // Remove this card's index from list of possibilities
+  const indexArray = choose.removeIndex(index);
 
-const pickTimer = new Timer(true, [{ms: 200, fn: pickCard}]);
-
-
-
-btnPlay.addEventListener('click', e => {
-  log('running1', running);
-
-  if (running == true) {
-    // log('select');
-    running = pickTimer.pause();
-    if (card != null) card.classList.remove('show');
-    // btnPlay.classList.remove('running');
+  // Enable play-state buttons
+  board.classList.remove('running');
+  btnCancel.toggleAttribute('disabled', true);
+  
+  // If no more options, disable other buttons
+  if (indexArray.length == 0) {
+    btnPlay.toggleAttribute('disabled', true);
+    btnReveal.toggleAttribute('disabled', true);
   }
+}
 
-  if (running == false) {
-    // log('start');
-    prepPicker();
-    running = pickTimer.start();
-    // btnPlay.classList.add('running');
-  }
+function onCancel() {
+  // Remove focus style without choosing
+  if (index != null) cardParent.children[index].classList.remove('focus');
 
-  log('running2', running);
+  // Disable play-state buttons
+  board.classList.remove('running');
+  btnCancel.toggleAttribute('disabled', true);
+}
 
-  // running = pickTimer.toggle(); // returns boolean
-  btnPlay.classList.toggle('running', running);
-  // log(running);
+let index = null;
+function chooseNext(ts) { 
+  // Remove focus from last focused card
+  if (index != null) cardParent.children[index].classList.remove('focus');
 
-})
+  index = choose.random();
+  // index = choose.next();
+  // index = choose.nextReverse();
 
-
-function prepPicker() {
-  cardArray = document.querySelectorAll('.card.show');
-  indexHistory = [];
+  // Add focus style to element at index
+  if (index != null) cardParent.children[index].classList.add('focus');
 }
 
 
 
 ///////////////////////////////////////////////////////////////
+// UI Events
 
-// Choose random index, excluding previousIndexes
-function randomIndexExclude(max, excludeArray = []) {
-  let chosen = null;
-  while (chosen === null) {
-    const candidate = randomIntInclusive(0, max);
-    if (excludeArray.length === 0) chosen = candidate;
-    if (excludeArray.indexOf(candidate) === -1) chosen = candidate;
-  }
-  return chosen;
-}
+btnPlay.addEventListener('click', e => {
+  timerChoose.toggle();
+});
+
+btnCancel.addEventListener('click', e => {
+  timerChoose.cancel();
+});
+
+btnReset.addEventListener('click', e => {
+  timerChoose.cancel();
+
+  // Re-run setup to clear history etc
+  choose.setup(cardList.length);
+
+  // Reset all cards' classes without animating
+  cardParent.querySelectorAll('.card').forEach( child => {
+    child.classList.add('show');
+    child.classList.remove('hide');
+  });
+
+  // Enable play-state buttons
+  btnPlay.toggleAttribute('disabled', false);
+  btnReveal.toggleAttribute('disabled', false);
+});
+
+btnReveal.addEventListener('click', e => {
+  timerChoose.cancel();
+
+  // Hide all cards without animating
+  cardParent.querySelectorAll('.card').forEach( child => {
+    child.classList.remove('show');
+  });
+
+  // Disable play-state buttons
+  btnPlay.toggleAttribute('disabled', true);
+  btnReveal.toggleAttribute('disabled', true);
+})
 
 
-function randomIntInclusive(min, max) {
-  const minCeiled = Math.ceil(min);
-  const maxFloored = Math.floor(max);
-  return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled); // The maximum is inclusive and the minimum is inclusive
-}
+rngSpeed.addEventListener('input', e => {
+  // log(e.target.value, e.target.max);
+  // timerChoose.updateInterval(0, e.target.value);
+  timerChoose.updateInterval(0, (Number(e.target.max) - e.target.value) + Number(e.target.min));
+})
+

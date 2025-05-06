@@ -1,5 +1,5 @@
 
-
+import { uiElement } from '../_common/modules/ui-element.js';
 import { Timer } from '../_common/modules/timer.js';
 import * as choose from '../_common/modules/choose.js';
 import { lerp, easeOutQuad } from '../_common/modules/utils.js';
@@ -11,51 +11,57 @@ const log = console.log;
 const lessonid = 'class5_bookb_07';
 const mediaPath = `../_lessons/${lessonid}/`;
 
-
+let timerChoose = new Timer(
+  [{ ms: 100, fn: chooseNext }],
+  onStart,
+  onPause,
+  onCancel
+);
+const speed = { min: 80, max: 1000}; // DOM slider is normalised value (ie 0-1 float)
 
 const display = document.querySelector('#display');
+
+// const cardParent = document.querySelector('#deck');
+let deck;
+// const cardList = document.querySelectorAll('.card');
 
 
 const cardList = [];
 
-
 function buildDeck(data) {
-  const deck = document.createElement('div');
-  deck.id = 'deck';
+  deck = uiElement({ type: 'div', id: 'deck' });
 
-  data.vocab.forEach( item => {
-    const card = buildCard(item);
+  data.vocab.forEach( (item, index) => {
+    const card = buildCard(item, index);
     cardList.push(card);
     deck.appendChild(card);
   });
 
-  // log(cardList);
+  log(cardList);
+  choose.setup(cardList.length);
 
   display.appendChild(deck);
+
+  
 }
 
 
 
-function buildCard(cardData) {
+function buildCard(cardData, index) {
 
-  const card  = document.createElement('div');
-  card.classList.add('card');
+  const card  = uiElement({ type: 'div', classes: 'card',
+    attrs: { 'style': `--anim-delay:${index}` },
+    data_attrs: { 'index': index }
+  });
 
-  const sides = document.createElement('div');
-  sides.classList.add('sides');
-  const back  = document.createElement('div');
-  back.classList.add('back');
-  const face = document.createElement('div');
-  face.classList.add('face');
+  const sides = uiElement({ type: 'div', classes: 'sides' });
+  const back  = uiElement({ type: 'div', classes: 'back' });
+  const face  = uiElement({ type: 'div', classes: 'face' });
+  
+  const image = uiElement({ type: 'img', attrs: { 'src': `${mediaPath}${cardData.image}` } });
+  const text  = uiElement({ type: 'p',   classes: 'text', text: cardData.text });
 
-  const img = document.createElement('img');
-  img.src = `${mediaPath}${cardData.image}`;
-
-  const text = document.createElement('p');
-  text.classList.add('text');
-  text.textContent = cardData.text;
-
-  face.appendChild(img);
+  face.appendChild(image);
   face.appendChild(text);
 
   sides.appendChild(face);
@@ -71,8 +77,27 @@ buildDeck(lessonData.data);
 
 
 function flipCard(e) {
+  timerChoose.cancel();
+  deck.classList.remove('staggered-flip');
+
   const card = e.currentTarget;
-  card.classList.toggle('show');
+  const shown = card.classList.toggle('show');
+
+  const cardIndex = Number(card.dataset.index);
+  let indexArray;
+  if (shown) {
+    indexArray = choose.removeIndex(cardIndex);
+  } else {
+    indexArray = choose.addIndex(cardIndex);
+  }
+  // log(indexArray);
+  if (indexArray.length == 0) {
+    btnPlay.toggleAttribute('disabled', true);
+    btnReveal.toggleAttribute('disabled', true);
+  } else {
+    btnPlay.toggleAttribute('disabled', false);
+    btnReveal.toggleAttribute('disabled', false);
+  }
 }
 
 
@@ -80,55 +105,137 @@ function flipCard(e) {
 
 //// Play
 
+// const display = document.querySelector('#board');
+const btnPlay   = document.querySelector('#btn-play');
+const btnCancel = document.querySelector('#btn-cancel');
+const btnReset  = document.querySelector('#btn-reset');
+const btnReveal = document.querySelector('#btn-reveal');
+const rngSpeed  = document.querySelector('#rng-speed');
 
-const btnPlay = document.querySelector('button#play');
-btnPlay.addEventListener('click', () => {
-  const playingTrue = display.classList.toggle('playing'); //// toggle() returns boolean
-  if (playingTrue) {
-    timer.play();
-  } else {
-    timer.pause();
+
+
+
+
+///////////////////////////////////////////////////////////////
+// Timer Callbacks
+
+function onStart() {
+  chooseNext();
+
+  // Enable play-state buttons
+  display.classList.add('running');
+  btnCancel.toggleAttribute('disabled', false);
+}
+
+
+function onPause() {
+  // Indicate the current card is chosen, animate out
+  if (index != null) deck.children[index].classList.add('show');
+
+  // Remove this card's index from list of possibilities
+  const indexArray = choose.removeIndex(index);
+
+  // Enable play-state buttons
+  display.classList.remove('running');
+  btnCancel.toggleAttribute('disabled', true);
+  
+  // If no more options, disable other buttons
+  if (indexArray.length == 0) {
+    btnPlay.toggleAttribute('disabled', true);
+    btnReveal.toggleAttribute('disabled', true);
   }
+}
+
+
+function onCancel() {
+  // Remove focus style without choosing
+  if (index != null) deck.children[index].classList.remove('focus');
+
+  // Disable play-state buttons
+  display.classList.remove('running');
+  btnCancel.toggleAttribute('disabled', true);
+}
+
+
+let index = null;
+function chooseNext() { 
+  // Remove focus from last focused card
+  if (index != null) deck.children[index].classList.remove('focus');
+
+  // index = choose.random();
+  index = choose.next();
+  // index = choose.nextReverse();
+
+  // Add focus style to element at chosen index
+  if (index != null) deck.children[index].classList.add('focus');
+}
+
+
+
+///////////////////////////////////////////////////////////////
+// UI Events
+
+btnPlay.addEventListener('click', e => {
+  deck.classList.remove('staggered-flip');
+  timerChoose.toggle();
 });
 
-const rngSpeed = document.querySelector('#speed');
-rngSpeed.addEventListener('input', (e) => {
-  const val = e.currentTarget.value;
-  timer.intervalSet( speedToInterval(val) );
 
-  const gapMS = speedToGap(val);
-  timer.gapSet( gapMS );
-  document.documentElement.style.setProperty('--flipms', `${gapMS * 0.8}ms`);
-});
-
-const fwd = document.querySelector('button#fwd');
-fwd.addEventListener('click', e => {
-  timer.settings({ playBackwards: false });
-});
-
-const bck = document.querySelector('button#bck');
-bck.addEventListener('click', e => {
-  timer.settings({ playBackwards: true });
-});
-
-const rnd = document.querySelector('#playrandom');
-rnd.addEventListener('change', e => {
-  timer.settings({ playRandom: e.currentTarget.checked });
+btnCancel.addEventListener('click', e => {
+  deck.classList.remove('staggered-flip');
+  timerChoose.cancel();
 });
 
 
-timer.settings({
-  interval: speedToInterval(rngSpeed.value),
-  intervalGap: 1000,
-  maxIndex: cardList.length - 1,
-  intervalStartCallback: showCard,
-  intervalEndCallback: hideCard,
-  // playBackwards: true,
-  playRandom: true
+btnReset.addEventListener('click', e => {
+  timerChoose.cancel();
+
+  // Re-run setup to clear history etc
+  choose.setup(cardList.length);
+
+
+  // Show all cards with time stagger
+  deck.classList.add('staggered-flip');
+  deck.querySelectorAll('.card').forEach( child => {
+    child.classList.remove('show');
+  });
+
+  // Enable play-state buttons
+  btnPlay.toggleAttribute('disabled', false);
+  btnReveal.toggleAttribute('disabled', false);
 });
 
 
+btnReveal.addEventListener('click', e => {
+  timerChoose.cancel();
 
+
+  // Hide all cards with time stagger
+  deck.classList.add('staggered-flip');
+  deck.querySelectorAll('.card').forEach( child => {
+    child.classList.add('show');
+  });
+
+  // Disable play-state buttons
+  btnPlay.toggleAttribute('disabled', true);
+  btnReveal.toggleAttribute('disabled', true);
+})
+
+
+rngSpeed.addEventListener('input', updateSpeedFromSlider);
+
+// Needs to be it's own function to allow timer to update from UI slider on page load
+function updateSpeedFromSlider() {
+  const shapedValue = ((speed.max - speed.min) - easeOutQuad(rngSpeed.value) * (speed.max - speed.min)) + speed.min;
+  timerChoose.updateInterval(0, shapedValue);
+}
+
+
+updateSpeedFromSlider();
+
+
+
+/*
 
 function showCard(index) {
   // log('show', index)
@@ -149,4 +256,4 @@ function speedToInterval(value) {
 
 function speedToGap(value) {
   return 800 - (value * 5);
-}
+}*/

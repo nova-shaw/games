@@ -46,6 +46,15 @@ export function removeIndex(index) {
   return indexArray; // Send remaining options back if needed
 }
 
+export function addIndex(index) {
+  if (indexArray.indexOf(index) > -1) return;
+
+  indexArray.push(index); 
+  indexArray.sort();
+  setHistoryMax(indexArray.length); // Update how many to remember for exclusion
+  return indexArray; // Send remaining options back if needed
+}
+
 
 ///////////////////////////////////////////////////////////////
 

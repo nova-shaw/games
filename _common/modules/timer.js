@@ -3,6 +3,7 @@ export class Timer {
   #startat;
   #elapsed;
   #intervalIndex;
+  #triggerInterval;
 
   constructor(intervals, startCallback = null, pauseCallback = null, cancelCallback = null) {
     this.intervals      = intervals;
@@ -14,9 +15,12 @@ export class Timer {
     this.#startat = 0;
     this.#elapsed = 0;
     this.#intervalIndex = 0;
+    this.#triggerInterval = true; // used to trigger interval callback at START of elapsed time
   }
 
-  start() {
+  start(setIntervalIndex = null) {
+    if (setIntervalIndex != null) this.#intervalIndex = setIntervalIndex;
+
     this.running = true;
     this.#startat = performance.now();
     
@@ -32,11 +36,13 @@ export class Timer {
     return this.running;
   }
 
-  toggle() {
+  toggle(setIntervalIndex = null) {
+    if (setIntervalIndex != null) this.#intervalIndex = setIntervalIndex;
+
     if (this.running) {
       this.pause();
     } else { 
-      this.start();
+      this.start(setIntervalIndex);
     }
     return this.running;
   }
@@ -56,9 +62,15 @@ export class Timer {
 
     this.#elapsed = timestamp - this.#startat;
 
-    if (this.#elapsed >= this.intervals[this.#intervalIndex].ms) {
+    if (this.#triggerInterval) {
       this.intervals[this.#intervalIndex].fn(this.#elapsed);
+      this.#triggerInterval = false;
+    }
+
+    if (this.#elapsed >= this.intervals[this.#intervalIndex].ms) {
       this.#intervalIndex = (this.#intervalIndex == this.intervals.length - 1) ? 0 : this.#intervalIndex + 1;
+      // console.log(this.#intervalIndex);
+      this.#triggerInterval = true;
       this.#startat = timestamp;
     }
 

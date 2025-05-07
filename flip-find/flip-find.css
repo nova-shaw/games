@@ -11,7 +11,7 @@
 }
 
 html {
-  --flipms: 600ms;
+  --flipms: 400ms;
   --shadow: #0005;
   --card-color: #0bf;
   /* --card-hover-color: #0ad; */

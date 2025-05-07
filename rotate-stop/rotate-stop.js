@@ -12,12 +12,15 @@ const lessonid = 'class5_bookb_07';
 const mediaPath = `../_lessons/${lessonid}/`;
 
 let timerChoose = new Timer(
-  [{ ms: 100, fn: chooseNext }],
+  [
+    { ms: 100, fn: chooseAndShow },
+    { ms: 100, fn: hideLast }
+  ],
   onStart,
   onPause,
   onCancel
 );
-const speed = { min: 80, max: 1000}; // DOM slider is normalised value (ie 0-1 float)
+
 
 const display = document.querySelector('#display');
 
@@ -84,6 +87,7 @@ function flipCard(e) {
   const shown = card.classList.toggle('show');
 
   const cardIndex = Number(card.dataset.index);
+  /*
   let indexArray;
   if (shown) {
     indexArray = choose.removeIndex(cardIndex);
@@ -98,6 +102,7 @@ function flipCard(e) {
     btnPlay.toggleAttribute('disabled', false);
     btnReveal.toggleAttribute('disabled', false);
   }
+  */
 }
 
 
@@ -120,7 +125,7 @@ const rngSpeed  = document.querySelector('#rng-speed');
 // Timer Callbacks
 
 function onStart() {
-  chooseNext();
+  // chooseAndShow();
 
   // Enable play-state buttons
   display.classList.add('running');
@@ -133,17 +138,17 @@ function onPause() {
   if (index != null) deck.children[index].classList.add('show');
 
   // Remove this card's index from list of possibilities
-  const indexArray = choose.removeIndex(index);
+  // const indexArray = choose.removeIndex(index);
 
   // Enable play-state buttons
   display.classList.remove('running');
   btnCancel.toggleAttribute('disabled', true);
   
   // If no more options, disable other buttons
-  if (indexArray.length == 0) {
+  /*if (indexArray.length == 0) {
     btnPlay.toggleAttribute('disabled', true);
     btnReveal.toggleAttribute('disabled', true);
-  }
+  }*/
 }
 
 
@@ -158,18 +163,23 @@ function onCancel() {
 
 
 let index = null;
-function chooseNext() { 
+function chooseAndShow() {
   // Remove focus from last focused card
-  if (index != null) deck.children[index].classList.remove('focus');
+  // if (index != null) deck.children[index].classList.remove('show');
 
   // index = choose.random();
   index = choose.next();
   // index = choose.nextReverse();
+  // log('chooseAndShow', index)
 
   // Add focus style to element at chosen index
-  if (index != null) deck.children[index].classList.add('focus');
+  if (index != null) deck.children[index].classList.add('show');
 }
 
+function hideLast() {
+  // log('hideLast', index)
+  if (index != null) deck.children[index].classList.remove('show');
+}
 
 
 ///////////////////////////////////////////////////////////////
@@ -177,7 +187,7 @@ function chooseNext() {
 
 btnPlay.addEventListener('click', e => {
   deck.classList.remove('staggered-flip');
-  timerChoose.toggle();
+  timerChoose.toggle(0);
 });
 
 
@@ -224,10 +234,13 @@ btnReveal.addEventListener('click', e => {
 
 rngSpeed.addEventListener('input', updateSpeedFromSlider);
 
-// Needs to be it's own function to allow timer to update from UI slider on page load
+const speed = { min: 300, max: 1200}; // DOM slider is normalised value (ie 0-1 float)
+
+// Needs to be its own function to allow timer to update from UI slider on page load
 function updateSpeedFromSlider() {
   const shapedValue = ((speed.max - speed.min) - easeOutQuad(rngSpeed.value) * (speed.max - speed.min)) + speed.min;
   timerChoose.updateInterval(0, shapedValue);
+  timerChoose.updateInterval(1, shapedValue / 2);
 }
 
 

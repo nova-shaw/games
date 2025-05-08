@@ -2,7 +2,8 @@
 {
   "info": {
     "course": "kids",
-    "level": "class5", // used to be called "2B'
+    "level": "class5",
+    "legacylevel": "2B",
     "book": "b",
     "number": 7,
     "title": "I like science."

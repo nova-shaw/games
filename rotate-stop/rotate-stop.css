@@ -11,7 +11,7 @@
 }
 
 html {
-  --flipms: 600ms;
+  --flipms: 500ms;
   --shadow: #0005;
   --card-color: #0bf;
   /* --card-hover-color: #0ad; */
@@ -68,14 +68,14 @@ main {
   height: 100%;
   position: relative;
   transform-style: preserve-3d;
-/*  transition: all var(--flipms) ease-out;*/
+  /* transition: all var(--flipms) ease-out; */
 /*  transition: transform var(--flipms) ease-out, transform-origin var(--flipms) ease-in;*/
   /* transition: all var(--flipms) cubic-bezier(0.42, 0.05, 0.24, 1.2); */
-  /* transition: all var(--flipms) cubic-bezier(0.42, 0.05, 0.26, 1.06); */
+  transition: all var(--flipms) cubic-bezier(0.42, 0.05, 0.26, 1.06);
   /* transition: all var(--flipms) cubic-bezier(0.79, 0.08, 0.46, 0.77); */
   /* transform-origin: center left; */
-  transform-origin: bottom center;
-  transition: all var(--flipms) cubic-bezier(0.42, 0.05, 0.24, 1.2);
+  /* transform-origin: bottom center; */
+  /* transition: all var(--flipms) cubic-bezier(0.42, 0.05, 0.24, 1.2); */
 
   /* transition-delay: calc(var(--anim-delay) * 100ms); */
 }
@@ -162,7 +162,7 @@ main {
 .card.show .sides {
 /*  transform: rotateX(-180deg);*/
   /* transform: rotateX(180deg) translateY(100%); */
-  rotate: y 180deg;
+  rotate: y -180deg;
   /* translate: 0 -100%; */
   transform-origin: bottom center;
 /*  scale: 1.2;*/

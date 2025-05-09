@@ -1,84 +1,46 @@
-
-import { uiElement } from '../_common/modules/ui-element.js';
-import { Timer } from '../_common/modules/timer.js';
-import * as choose from '../_common/modules/choose.js';
-import { lerp, easeOutQuad } from '../_common/modules/utils.js';
-
-import * as lessonData from '../_lessons/class5_bookb_07.js';
+import { buildDeck }   from '../_common/modules/card-builder.js';
+import { Timer }       from '../_common/modules/timer.js';
+import * as choose     from '../_common/modules/choose.js';
+import { easeOutQuad } from '../_common/modules/utils.js';
+import * as fetcher    from '../_common/modules/fetcher.js';
 
 const log = console.log;
 
-const lessonid = 'class5_bookb_07';
-const mediaPath = `../_lessons/${lessonid}/`;
-
-let timerChoose = new Timer(
-  [{ ms: 100, fn: chooseNext }],
-  onStart,
-  onPause,
-  onCancel
-);
-const speed = { min: 80, max: 1000}; // DOM slider is normalised value (ie 0-1 float)
+///////////////////////////////////////////////////////////////
+// Setup
 
 const display = document.querySelector('#display');
 
-// const cardParent = document.querySelector('#deck');
+
+
+
+
+let lessonData;
 let deck;
-// const cardList = document.querySelectorAll('.card');
+let cardList;
 
-
-const cardList = [];
-
-function buildDeck(data) {
-  deck = uiElement({ type: 'div', id: 'deck' });
-
-  data.vocab.forEach( (item, index) => {
-    const card = buildCard(item, index);
-    cardList.push(card);
-    deck.appendChild(card);
-  });
-
-  log(cardList);
-  choose.setup(cardList.length);
-
+(async () => {
+  lessonData = await fetcher.all(['../_lessons/kids_5b07.json']);
+  deck = await buildDeck(lessonData[0], cardClick, 'stripes'); // Patterns: dots | stripes | check | zigzag
   display.appendChild(deck);
+  cardList = [...deck.children];
+  choose.setup(cardList.length);
+})();
 
-  
-}
+let timer = new Timer(
+  [{ ms: 100, fn: chooseNext }],
+  onStart, onPause, onCancel
+);
 
-
-
-function buildCard(cardData, index) {
-
-  const card  = uiElement({ type: 'div', classes: 'card',
-    attrs: { 'style': `--anim-delay:${index}` },
-    data_attrs: { 'index': index }
-  });
-
-  const sides = uiElement({ type: 'div', classes: 'sides' });
-  const back  = uiElement({ type: 'div', classes: 'back' });
-  const face  = uiElement({ type: 'div', classes: 'face' });
-  
-  const image = uiElement({ type: 'img', attrs: { 'src': `${mediaPath}${cardData.image}` } });
-  const text  = uiElement({ type: 'p',   classes: 'text', text: cardData.text });
-
-  face.appendChild(image);
-  face.appendChild(text);
-
-  sides.appendChild(face);
-  sides.appendChild(back);
-  card.appendChild(sides);
-
-  card.addEventListener('click', flipCard);
-
-  return card;
-}
-
-buildDeck(lessonData.data);
+const speed = { min: 80, max: 1000}; // DOM slider is normalised value (ie 0-1 float)
 
 
-function flipCard(e) {
-  timerChoose.cancel();
-  deck.classList.remove('staggered-flip');
+///////////////////////////////////////////////////////////////
+// Card Event
+
+function cardClick(e) {
+  timer.cancel();
+  deck.classList.remove('anim-stagger');
 
   const card = e.currentTarget;
   const shown = card.classList.toggle('show');
@@ -99,21 +61,6 @@ function flipCard(e) {
     btnReveal.toggleAttribute('disabled', false);
   }
 }
-
-
-
-
-//// Play
-
-// const display = document.querySelector('#board');
-const btnPlay   = document.querySelector('#btn-play');
-const btnCancel = document.querySelector('#btn-cancel');
-const btnReset  = document.querySelector('#btn-reset');
-const btnReveal = document.querySelector('#btn-reveal');
-const rngSpeed  = document.querySelector('#rng-speed');
-
-
-
 
 
 ///////////////////////////////////////////////////////////////
@@ -173,29 +120,32 @@ function chooseNext() {
 
 
 ///////////////////////////////////////////////////////////////
-// UI Events
+// Control UI Events
 
+const btnPlay = document.querySelector('#btn-play');
 btnPlay.addEventListener('click', e => {
-  deck.classList.remove('staggered-flip');
-  timerChoose.toggle();
+  deck.classList.remove('anim-stagger');
+  timer.toggle();
 });
 
 
+const btnCancel = document.querySelector('#btn-cancel');
 btnCancel.addEventListener('click', e => {
-  deck.classList.remove('staggered-flip');
-  timerChoose.cancel();
+  deck.classList.remove('anim-stagger');
+  timer.cancel();
 });
 
 
+const btnReset = document.querySelector('#btn-reset');
 btnReset.addEventListener('click', e => {
-  timerChoose.cancel();
+  timer.cancel();
 
   // Re-run setup to clear history etc
   choose.setup(cardList.length);
 
-
   // Show all cards with time stagger
-  deck.classList.add('staggered-flip');
+  log(deck);
+  deck.classList.add('anim-stagger');
   deck.querySelectorAll('.card').forEach( child => {
     child.classList.remove('show');
   });
@@ -206,12 +156,12 @@ btnReset.addEventListener('click', e => {
 });
 
 
+const btnReveal = document.querySelector('#btn-reveal');
 btnReveal.addEventListener('click', e => {
-  timerChoose.cancel();
-
+  timer.cancel();
 
   // Hide all cards with time stagger
-  deck.classList.add('staggered-flip');
+  deck.classList.add('anim-stagger');
   deck.querySelectorAll('.card').forEach( child => {
     child.classList.add('show');
   });
@@ -222,38 +172,16 @@ btnReveal.addEventListener('click', e => {
 })
 
 
+///////////////////////////////
+// Speed change
+
+const rngSpeed = document.querySelector('#rng-speed');
 rngSpeed.addEventListener('input', updateSpeedFromSlider);
 
-// Needs to be it's own function to allow timer to update from UI slider on page load
 function updateSpeedFromSlider() {
   const shapedValue = ((speed.max - speed.min) - easeOutQuad(rngSpeed.value) * (speed.max - speed.min)) + speed.min;
-  timerChoose.updateInterval(0, shapedValue);
+  timer.updateInterval(0, shapedValue);
 }
 
+updateSpeedFromSlider(); // Init value from DOM element
 
-updateSpeedFromSlider();
-
-
-
-/*
-
-function showCard(index) {
-  // log('show', index)
-  cardList[index].classList.add('show');
-}
-
-function hideCard(index) {
-  // log('hide', index)
-  cardList[index].classList.remove('show');
-}
-
-
-//// Utils
-
-function speedToInterval(value) {
-  return 2400 - (value * 20);
-}
-
-function speedToGap(value) {
-  return 800 - (value * 5);
-}*/

@@ -1,12 +1,12 @@
 /**
-*  Using 'Simulated' named paramers (with defaults) - https://exploringjs.com/js/book/ch_callables.html#simulating-named-parameters
-*  
-*  Call like:
-*  uiElement({ type: 'button', attrs: { key: 'value' } })
+* Convenience function for creating DOM elements
+* Usage:
+* uiElement({ type: 'button', attrs: { key: 'value' } })
 */
 
-export function uiElement({
+export function uiElement({ // These are 'simulated' named paramers (with defaults) - https://exploringjs.com/js/book/ch_callables.html#simulating-named-parameters
   type       = 'div',
+  href       = null,
   id         = null,
   classes    = null,
   attrs      = null,
@@ -16,6 +16,10 @@ export function uiElement({
 {
 
   const element = document.createElement(type);
+
+  if (href) {
+    element.href = href;
+  }
 
   if (id) {
     element.setAttribute('id', id);

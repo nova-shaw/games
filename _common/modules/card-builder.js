@@ -5,11 +5,12 @@ const log = console.log;
 
 
 
-export function buildDeck(data, mediaPath, clickCallback) {
+export function buildDeck(data, clickCallback, cssBackPattern = 'dots') {
   const deck = uiElement({ type: 'div', id: 'deck' });
+  const mediaPath = data.meta.mediapath;
 
   data.vocab.forEach( (item, index) => {
-    const card = buildCard(item, index, mediaPath);
+    const card = buildCard(item, index, mediaPath, cssBackPattern);
     card.addEventListener('click', clickCallback);
     deck.appendChild(card);
   });
@@ -19,7 +20,7 @@ export function buildDeck(data, mediaPath, clickCallback) {
 
 
 
-export function buildCard(cardData, index, mediaPath) {
+export function buildCard(cardData, index, mediaPath, cssBackPattern) {
 
   const card  = uiElement({ type: 'div', classes: 'card',
     attrs: { 'style': `--anim-delay:${index}` },
@@ -30,11 +31,13 @@ export function buildCard(cardData, index, mediaPath) {
   const back  = uiElement({ type: 'div', classes: 'back' });
   const face  = uiElement({ type: 'div', classes: 'face' });
   
-  const image = uiElement({ type: 'img', attrs: { 'src': `${mediaPath}${cardData.image}` } });
+  const image = uiElement({ type: 'img', attrs: { 'src': `../${mediaPath}${cardData.image}` } });
   const text  = uiElement({ type: 'p',   classes: 'text', text: cardData.text });
-
   face.appendChild(image);
   face.appendChild(text);
+
+  const pattern = uiElement({ type: 'div', classes: `pattern ${cssBackPattern}` });
+  back.appendChild(pattern);
 
   sides.appendChild(face);
   sides.appendChild(back);

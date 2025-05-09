@@ -1,12 +1,13 @@
 
 {
-  "info": {
+  "meta": {
     "course": "kids",
     "level": "class5",
     "legacylevel": "2B",
     "book": "b",
     "number": 7,
-    "title": "I like science."
+    "title": "I like science.",
+    "mediapath": "_lessons/class5_bookb_07/"
   },
   "bquestions": [ 10, 4 ],
   "target": [

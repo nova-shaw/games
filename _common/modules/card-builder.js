@@ -47,3 +47,6 @@ export function buildCard(cardData, index, mediaPath, cssBackPattern) {
   return card;
 }
 
+export function buildCompCard(imgArray) {
+
+}

@@ -21,7 +21,7 @@ let cardList;
 
 (async () => {
   lessonData = await fetcher.all(['../_lessons/kids_5b07.json']);
-  deck = await buildDeck(lessonData[0], cardClick, 'stripes'); // Patterns: dots | stripes | check | zigzag
+  deck = await buildDeck(lessonData[0], cardClick, 'check'); // Patterns: dots | stripes | check | zigzag
   display.appendChild(deck);
   cardList = [...deck.children];
   choose.setup(cardList.length);
@@ -70,7 +70,7 @@ function onStart() {
   chooseNext();
 
   // Enable play-state buttons
-  display.classList.add('running');
+  document.body.classList.add('running');
   btnCancel.toggleAttribute('disabled', false);
 }
 
@@ -83,7 +83,7 @@ function onPause() {
   const indexArray = choose.removeIndex(index);
 
   // Enable play-state buttons
-  display.classList.remove('running');
+  document.body.classList.remove('running');
   btnCancel.toggleAttribute('disabled', true);
   
   // If no more options, disable other buttons
@@ -99,7 +99,7 @@ function onCancel() {
   if (index != null) deck.children[index].classList.remove('focus');
 
   // Disable play-state buttons
-  display.classList.remove('running');
+  document.body.classList.remove('running');
   btnCancel.toggleAttribute('disabled', true);
 }
 

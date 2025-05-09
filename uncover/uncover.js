@@ -1,33 +1,58 @@
 
 import { Timer } from '../_common/modules/timer.js';
 import * as choose from '../_common/modules/choose.js';
-import { lerp, easeOutQuad } from '../_common/modules/utils.js';
+import { easeOutQuad } from '../_common/modules/utils.js';
+import { uiElement } from '../_common/modules/ui-element.js';
 
 const log = console.log;
 
-const board = document.querySelector('#board');
+// const board = document.querySelector('#board');
 const btnPlay   = document.querySelector('#btn-play');
 const btnCancel = document.querySelector('#btn-cancel');
 const btnReset  = document.querySelector('#btn-reset');
 const btnReveal = document.querySelector('#btn-reveal');
-const rngSpeed  = document.querySelector('#rng-Speed');
 
+
+
+const speed = { min: 80, max: 1000}; // DOM slider is normalised value (ie 0-1 float)
+
+const panelGrid = [4, 4];
+// const panelCount = panelGrid.reduce((a, b) => { a * b });
+const panelCount = panelGrid[0] * panelGrid[1];
+// log(panelCount);
+
+
+const imageElm = document.querySelector('.compcard img');
+const textElm = document.querySelector('.compcard p');
+
+imageElm.src = '../_lessons/class5_bookb_07/english.svg';
+textElm.textContent = 'English';
+
+// Build Panels
+const panelParent = document.querySelector('#panels');
+panelParent.style = `--cols: ${panelGrid[0]}; --rows: ${panelGrid[1]};`
+
+for (let i = 0; i < panelCount; i++) {
+
+  const panel = uiElement({ type: 'div', classes: 'panel pattern stripes',
+    attrs: { 'style': `--anim-delay:${i}` }, // Thanks for the CSS-only stagger idea: https://stackoverflow.com/a/70476658
+    data_attrs: { 'index': i }
+  })
+
+  panelParent.appendChild(panel)
+}
 
 // Set up Chooser
-const cardParent = document.querySelector('#cards');
-const cardList = document.querySelectorAll('.card');
-choose.setup(cardList.length);
+const panelList = document.querySelectorAll('.panel');
+choose.setup(panelList.length);
 
 
 // Set up Timer
-const timerChoose = new Timer(
+const timer = new Timer(
   [{ ms: 100, fn: chooseNext }],
-  onStart,
-  onPause,
-  onCancel
+  onStart, onPause, onCancel
 );
-const speed = { min: 80, max: 1000}; // DOM slider is normalised value (ie 0-1 float)
-updateSpeedFromSlider();
+
 
 
 ///////////////////////////////////////////////////////////////
@@ -35,22 +60,25 @@ updateSpeedFromSlider();
 
 function onStart() {
   chooseNext();
+  document.body.classList.remove('reveal');
 
   // Enable play-state buttons
-  board.classList.add('running');
+  document.body.classList.add('running');
   btnCancel.toggleAttribute('disabled', false);
 }
 
 
 function onPause() {
   // Indicate the current card is chosen, animate out
-  if (index != null) cardParent.children[index].classList.replace('show', 'hide');
+  // if (index != null) panelParent.children[index].classList.replace('show', 'hide');
+  // if (index != null) panelParent.children[index].classList.add('hide');
+  if (index != null) panelParent.children[index].classList.replace('focus', 'hide');
 
   // Remove this card's index from list of possibilities
   const indexArray = choose.removeIndex(index);
 
   // Enable play-state buttons
-  board.classList.remove('running');
+  document.body.classList.remove('running');
   btnCancel.toggleAttribute('disabled', true);
   
   // If no more options, disable other buttons
@@ -58,15 +86,17 @@ function onPause() {
     btnPlay.toggleAttribute('disabled', true);
     btnReveal.toggleAttribute('disabled', true);
   }
+
+  log(panelList)
 }
 
 
 function onCancel() {
   // Remove focus style without choosing
-  if (index != null) cardParent.children[index].classList.remove('focus');
+  if (index != null) panelParent.children[index].classList.remove('focus');
 
   // Disable play-state buttons
-  board.classList.remove('running');
+  document.body.classList.remove('running');
   btnCancel.toggleAttribute('disabled', true);
 }
 
@@ -74,14 +104,14 @@ function onCancel() {
 let index = null;
 function chooseNext() { 
   // Remove focus from last focused card
-  if (index != null) cardParent.children[index].classList.remove('focus');
+  if (index != null) panelParent.children[index].classList.remove('focus');
 
   index = choose.random();
   // index = choose.next();
   // index = choose.nextReverse();
 
   // Add focus style to element at chosen index
-  if (index != null) cardParent.children[index].classList.add('focus');
+  if (index != null) panelParent.children[index].classList.add('focus');
 }
 
 
@@ -90,24 +120,25 @@ function chooseNext() {
 // UI Events
 
 btnPlay.addEventListener('click', e => {
-  timerChoose.toggle();
+  timer.toggle();
 });
 
 
 btnCancel.addEventListener('click', e => {
-  timerChoose.cancel();
+  timer.cancel();
 });
 
 
 btnReset.addEventListener('click', e => {
-  timerChoose.cancel();
+  timer.cancel();
+  document.body.classList.remove('reveal');
 
   // Re-run setup to clear history etc
-  choose.setup(cardList.length);
+  choose.setup(panelList.length);
 
   // Reset all cards' classes without animating
-  cardParent.querySelectorAll('.card').forEach( child => {
-    child.classList.add('show');
+  panelList.forEach( child => {
+    // child.classList.add('show');
     child.classList.remove('hide');
   });
 
@@ -118,11 +149,14 @@ btnReset.addEventListener('click', e => {
 
 
 btnReveal.addEventListener('click', e => {
-  timerChoose.cancel();
+
+  document.body.classList.add('reveal');
+  timer.cancel();
 
   // Hide all cards without animating
-  cardParent.querySelectorAll('.card').forEach( child => {
-    child.classList.remove('show');
+  panelList.forEach( child => {
+    // child.classList.remove('show');
+    child.classList.add('hide');
   });
 
   // Disable play-state buttons
@@ -131,12 +165,16 @@ btnReveal.addEventListener('click', e => {
 })
 
 
+///////////////////////////////
+// Speed change
+
+const rngSpeed = document.querySelector('#rng-speed');
 rngSpeed.addEventListener('input', updateSpeedFromSlider);
 
-// Needs to be it's own function to allow timer to update from UI slider on page load
 function updateSpeedFromSlider() {
   const shapedValue = ((speed.max - speed.min) - easeOutQuad(rngSpeed.value) * (speed.max - speed.min)) + speed.min;
-  timerChoose.updateInterval(0, shapedValue);
+  // Update first interval only (chooseAndShow) - leave second interval (hideAll) as a constant
+  timer.updateInterval(0, shapedValue);
 }
 
-
+updateSpeedFromSlider(); // Init value from DOM element

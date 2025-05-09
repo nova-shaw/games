@@ -7,20 +7,16 @@
   <script src="./uncover.js" type="module"></script>
   <link href="./uncover.css" rel="stylesheet" type="text/css">
 </head>
-<body>
+<body data-game="uncover">
 
-  <main id="board">
+  <main>
 
-    <div id="cards">
-      <div class="card show"></div>
-      <div class="card show"></div>
-      <div class="card show"></div>
-      <div class="card show"></div>
-      <div class="card show"></div>
-      <div class="card show"></div>
-      <div class="card show"></div>
-      <div class="card show"></div>
-      <div class="card show"></div>
+    <div id="display">
+      <div class="compcard single">
+        <img src="../_lessons/class5_bookb_07/art.svg">
+        <p>art</p>
+      </div>
+      <div id="panels"></div>
     </div>
 
     <div id="controls">
@@ -31,8 +27,9 @@
       <button class="btn" id="btn-cancel" disabled>Cancel</button>
       <button class="btn" id="btn-reset">R</button>
       <button class="btn" id="btn-reveal">A</button>
-      <input type="range" name="rng-Speed" id="rng-Speed" min="0" max="1" value="0.5" step="0.001">
+      <input type="range" name="rng-speed" id="rng-speed" min="0" max="1" value="0.5" step="0.001">
     </div>
+  
   </main>
 
 </body>

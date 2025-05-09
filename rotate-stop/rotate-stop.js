@@ -53,7 +53,7 @@ function cardClick(e) {
 
 function onStart() {
   // Enable play-state buttons
-  display.classList.add('running');
+  document.body.classList.add('running');
 }
 
 
@@ -62,7 +62,7 @@ function onPause() {
   if (index != null) deck.children[index].classList.add('show');
 
   // Enable play-state buttons
-  display.classList.remove('running');
+  document.body.classList.remove('running');
 }
 
 
@@ -71,7 +71,7 @@ function onCancel() {
   hideAll();
 
   // Disable play-state buttons
-  display.classList.remove('running');
+  document.body.classList.remove('running');
 }
 
 
@@ -150,4 +150,3 @@ function updateSpeedFromSlider() {
 }
 
 updateSpeedFromSlider(); // Init value from DOM element
-

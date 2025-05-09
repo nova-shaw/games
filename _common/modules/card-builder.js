@@ -23,7 +23,7 @@ export function buildDeck(data, clickCallback, cssBackPattern = 'dots') {
 export function buildCard(cardData, index, mediaPath, cssBackPattern) {
 
   const card  = uiElement({ type: 'div', classes: 'card',
-    attrs: { 'style': `--anim-delay:${index}` },
+    attrs: { 'style': `--anim-delay:${index}` }, // Thanks for the CSS-only stagger idea: https://stackoverflow.com/a/70476658
     data_attrs: { 'index': index }
   });
 

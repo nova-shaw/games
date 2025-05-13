@@ -3,7 +3,16 @@ import { uiElement } from '../_common/modules/ui-element.js';
 import * as anim from '../_common/modules/anim.js';
 import * as lessonData from '../_lessons/class5_bookb_07.js';
 
+import { Timeline } from '../_common/modules/timeline.js';
+
 const log = console.log;
+
+
+const tl = new Timeline( {duration: 100} );
+tl.report();
+
+
+
 
 const lessonid = 'class5_bookb_07';
 const mediaPath = `../_lessons/${lessonid}/`;
@@ -96,7 +105,7 @@ function buildCardFace(cardData = null) {
   return face;
 }
 
-buildDeck(lessonData.data);
+// buildDeck(lessonData.data);
 
 
 

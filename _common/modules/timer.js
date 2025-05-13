@@ -53,6 +53,7 @@ export class Timer {
     return this.running;
   }
 
+  // Change the length ([value] in milliseconds) of interval at [index] in array [this.intervals]
   updateInterval(index, value) {
     this.intervals[index].ms = value;
   }
